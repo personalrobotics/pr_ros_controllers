@@ -1,0 +1,20 @@
+<library path="lib/libpr_ros_controllers">
+
+  <class name="pr_ros_controllers/PrJointPositionController"
+      type="pr_ros_controllers::PrJointPositionController"
+      base_class_type="controller_interface::ControllerBase">
+    <description>
+      The PrJointPositionController tracks position commands. It expects a PositionJointInterface type of hardware interface.
+    </description>
+  </class>
+  
+  <class name="pr_ros_controllers/JointModeController"
+      type="pr_ros_controllers::JointModeController"
+      base_class_type="controller_interface::ControllerBase">
+    <description>
+      Controller to allow joint controllers to easily switch modes between position, velocity, and effort-based control
+    </description>
+  </class>
+
+</library>
+
