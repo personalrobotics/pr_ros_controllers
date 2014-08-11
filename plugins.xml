@@ -8,6 +8,14 @@
     </description>
   </class>
   
+  <class name="pr_ros_controllers/PrJointVelocityController"
+      type="pr_ros_controllers::PrJointVelocityController"
+      base_class_type="controller_interface::ControllerBase">
+    <description>
+      The PrJointVelocityController tracks Velocity commands. It expects a VelocityJointInterface type of hardware interface.
+    </description>
+  </class>
+
   <class name="pr_ros_controllers/JointModeController"
       type="pr_ros_controllers::JointModeController"
       base_class_type="controller_interface::ControllerBase">

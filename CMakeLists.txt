@@ -13,6 +13,7 @@ include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}
   src/pr_joint_position_controller.cpp
+  src/pr_joint_velocity_controller.cpp
   src/joint_mode_controller.cpp
 )
 
