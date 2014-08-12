@@ -103,7 +103,7 @@ public:
     // TODO: Currently just does P and D, not I.
     double current_vel = joint_.getVelocity();
     double e = desired_ - current_vel;
-    joint_.setCommand(p_*e + d_*(e - last_e_));
+    joint_.setCommand(current_vel + p_*e + d_*(e - last_e_));
     last_e_ = e;
   }
 
