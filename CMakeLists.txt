@@ -5,8 +5,9 @@ project(pr_ros_controllers)
 find_package(catkin REQUIRED COMPONENTS 
     controller_interface 
     pluginlib 
+    rosconsole
     roscpp
-    )
+)
 find_package(Boost REQUIRED COMPONENTS system)
 
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
@@ -15,6 +16,9 @@ add_library(${PROJECT_NAME}
   src/pr_joint_position_controller.cpp
   src/pr_joint_velocity_controller.cpp
   src/joint_mode_controller.cpp
+)
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
 )
 
 # Declare catkin project
