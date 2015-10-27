@@ -201,10 +201,23 @@ void KdlTreeId::findChainFromNode(const std::string& baseFrame, const std::strin
 
 int KdlTreeId::findBranchNodes(const std::string& baseFrame, const std::string& ignoreFrame, std::vector<std::string>& nodeList, std::vector<std::string>& direction)
 {
-    KDL::SegmentMap::const_iterator it = tree.getSegment(baseFrame);
+    const KDL::SegmentMap& segments = tree.getSegments();
+
+    KDL::SegmentMap::const_iterator it = segments.find(baseFrame);
+    if (it == segments.end()) {
+      // TODO rt-safe
+      std::cerr << "Could not find segment " << baseFrame << std::endl;
+      throw std::runtime_error("Could not find segment");
+    }
 
     if (it != tree.getRootSegment())
     {
+        if (it->second.parent == segments.end()) {
+          // TODO rt-safe
+          std::cerr << "Could not find parent segment of " << baseFrame << std::endl;
+          throw std::runtime_error("Could not find parent segment");
+        }
+
         if (it->second.parent->first != ignoreFrame)
         {
             nodeList.push_back(it->second.parent->first);
