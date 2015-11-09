@@ -6,6 +6,12 @@
     </description>
   </class>
 
+  <class name="rewd_controllers/JointGroupVelocityController" type="rewd_controllers::JointGroupVelocityController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The JointGroupVelocityController tracks velocity commands. It expects a EffortJointInterface type of hardware interface.
+    </description>
+  </class>
+
   <class name="rewd_controllers/GravityCompensationController" type="rewd_controllers::GravityCompensationController" base_class_type="controller_interface::ControllerBase">
     <description>
       The GravityCompensationController opposes gravity using inverse dynamics.
