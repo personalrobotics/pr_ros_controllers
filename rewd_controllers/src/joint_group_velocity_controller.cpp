@@ -147,6 +147,7 @@ void JointGroupVelocityController::update(
 {
   joint_state_command = *(command_buffer.readFromRT());
 
+  // update dart model from hardware
   for (hardware_interface::JointHandle &handle : joint_handles_) {
     dart::dynamics::DegreeOfFreedom *const dof
       = skeleton_->getDof(handle.getName());
@@ -158,31 +159,34 @@ void JointGroupVelocityController::update(
     dof->setAcceleration(0.);
   }
 
-  skeleton_->computeInverseDynamics();
-
-  // PID control of each joint
+  // calculate PID and use to set model desired acceleration
   for (size_t i = 0; i < number_of_joints; ++i) {
     dart::dynamics::DegreeOfFreedom *const dof
       = controlled_skeleton_->getDof(i);
-    dart::dynamics::Joint *const joint = dof->getJoint();
-
     double const velocity_desired = joint_state_command[i];
     double const velocity_actual = dof->getVelocity();
     double const velocity_error = velocity_desired - velocity_actual;
 
     // Set the PID error and compute the PID command with nonuniform
     // time step size.
-    double const effort_pid = joint_pid_controllers[i].computeCommand(
+    double const velocity_pid = joint_pid_controllers[i].computeCommand(
       velocity_error, period);
+
+    dof->setAcceleration(velocity_pid);
+  }
+
+  // Calculate inverse dynamics and set hardware torque commands
+  skeleton_->computeInverseDynamics();
+
+  for (size_t i = 0; i < number_of_joints; ++i) {
+    dart::dynamics::DegreeOfFreedom *const dof
+      = controlled_skeleton_->getDof(i);
+
     double const effort_inversedynamics = dof->getForce();
-    double const effort_command = effort_pid + effort_inversedynamics;
 
     hardware_interface::JointHandle &joint_handle
       = controlled_joint_handles_[i];
-    joint_handle.setCommand(effort_command);
-
-    logfile << "Joint [" << dof->getName() << "]: PID = " << effort_pid
-            << " ID = " << effort_inversedynamics << "\n";
+    joint_handle.setCommand(effort_inversedynamics);
   }
 }
 
