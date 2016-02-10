@@ -4,6 +4,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <controller_interface/controller.h>
 #include <libbarrett_ros/hardware/ForceTorqueSensorInterface.h>
+#include <pluginlib/class_list_macros.h>
 #include <pr_ros_controllers/TareAction.h>
 #include <ros/node_handle.h>
 

@@ -24,5 +24,13 @@
     </description>
   </class>
 
+  <class name="pr_ros_controllers/ForceTorqueTareController"
+         type="pr_ros_controllers::ForceTorqueTareController"
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      Controller to send tare commands to a force torque sensor.
+    </description>
+  </class>
+
 </library>
 
