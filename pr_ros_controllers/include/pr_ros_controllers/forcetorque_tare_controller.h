@@ -1,7 +1,7 @@
 #ifndef PR_ROS_CONTROLLERS_FORCETORQUE_TARE_CONTROLLER_H_
 #define PR_ROS_CONTROLLERS_FORCETORQUE_TARE_CONTROLLER_H_
 
-#include <actionlib/server/simple_action_server.h>
+#include <actionlib/server/action_server.h>
 #include <controller_interface/controller.h>
 #include <libbarrett_ros/hardware/ForceTorqueSensorInterface.h>
 #include <pluginlib/class_list_macros.h>
@@ -10,7 +10,7 @@
 
 namespace pr_ros_controllers {
 
-  typedef actionlib::SimpleActionServer<TareAction> TareActionServer;
+  typedef actionlib::ActionServer<TareAction> TareActionServer;
 
   class ForceTorqueTareController :
     public controller_interface::Controller<libbarrett_ros::ForceTorqueSensorInterface>
@@ -26,10 +26,11 @@ namespace pr_ros_controllers {
   private:
     libbarrett_ros::ForceTorqueSensorHandle sensor_handle_;
     boost::shared_ptr<TareActionServer> tare_as_;
+    TareActionServer::GoalHandle active_goal_;
     TareFeedback feedback_;
     TareResult result_;
 
-    void asCallback(const TareGoalConstPtr &goal);
+    void asCallback(TareActionServer::GoalHandle gh);
   };
 
 }

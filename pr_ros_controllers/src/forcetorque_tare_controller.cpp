@@ -32,21 +32,25 @@ void ForceTorqueTareController::update(const ros::Time& time, const ros::Duratio
     if (feedback_.finished) {
       result_.success = true; // no way to confirm success from hardware
       feedback_.requested = false;
-      tare_as_->setSucceeded(result_);
+      active_goal_.setSucceeded(result_);
     }
     else {
-      tare_as_->publishFeedback(feedback_); // TODO reduce publish rate?
+      active_goal_.publishFeedback(feedback_); // TODO reduce publish rate?
     }
   }
 }
 
-void ForceTorqueTareController::asCallback(const TareGoalConstPtr &goal)
+void ForceTorqueTareController::asCallback(TareActionServer::GoalHandle gh)
 {
   ROS_INFO("Tare action called.");
-  sensor_handle_.tare();
+  if (feedback_.requested) {
+    // TODO complain
+    ROS_WARN("Tare called twice.");
+  }
+  active_goal_ = gh;
+  active_goal_.setAccepted();
   feedback_.requested = true;
-  tare_as_->acceptNewGoal();
-  // TODO need to "accept" goal?
+  sensor_handle_.tare();
 }
 
 PLUGINLIB_EXPORT_CLASS(pr_ros_controllers::ForceTorqueTareController, controller_interface::ControllerBase)
