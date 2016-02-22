@@ -7,13 +7,13 @@
 #include <geometry_msgs/WrenchStamped.h>
 #include <libbarrett_ros/hardware/ForceTorqueSensorInterface.h>
 #include <pluginlib/class_list_macros.h>
-#include <pr_ros_controllers/TareAction.h>
+#include <pr_control_msgs/TareAction.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <ros/node_handle.h>
 
 namespace pr_ros_controllers {
 
-  typedef actionlib::ActionServer<TareAction> TareActionServer;
+  typedef actionlib::ActionServer<pr_control_msgs::TareAction> TareActionServer;
 
   class ForceTorqueTareController :
     public controller_interface::Controller<libbarrett_ros::ForceTorqueSensorInterface>
@@ -34,8 +34,8 @@ namespace pr_ros_controllers {
     RtPublisherPtr ft_pub_;
     ros::Time last_publish_time_;
     TareActionServer::GoalHandle active_goal_;
-    TareFeedback feedback_;
-    TareResult result_;
+    pr_control_msgs::TareFeedback feedback_;
+    pr_control_msgs::TareResult result_;
     double publish_rate_;
 
     void asCallback(TareActionServer::GoalHandle gh);

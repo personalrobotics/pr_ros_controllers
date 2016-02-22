@@ -43,8 +43,7 @@ void ForceTorqueTareController::update(const ros::Time& time, const ros::Duratio
 {
   // Update tare status
   if (feedback_.requested) {
-    feedback_.finished = sensor_.isTareComplete();
-    if (feedback_.finished) {
+    if (sensor_.isTareComplete()) {
       result_.success = true; // no way to confirm success from hardware
       feedback_.requested = false;
       active_goal_.setSucceeded(result_);
@@ -61,7 +60,7 @@ void ForceTorqueTareController::update(const ros::Time& time, const ros::Duratio
       last_publish_time_ += ros::Duration(1.0/publish_rate_);
 
       ft_pub_->msg_.header.stamp = time;
-      ft_pub_->msg_.header.frame_id = sensor_.getFrameId(); // TODO
+      ft_pub_->msg_.header.frame_id = sensor_.getFrameId();
 
       ft_pub_->msg_.wrench.force.x = sensor_.getForce()[0];
       ft_pub_->msg_.wrench.force.y = sensor_.getForce()[1];
@@ -77,15 +76,19 @@ void ForceTorqueTareController::update(const ros::Time& time, const ros::Duratio
 
 void ForceTorqueTareController::asCallback(TareActionServer::GoalHandle gh)
 {
-  ROS_INFO("Tare action called.");
   if (feedback_.requested) {
-    // TODO complain
-    ROS_WARN("Tare called twice.");
+    ROS_DEBUG("Tare called twice.");
+    pr_control_msgs::TareResult rejected_result;
+    rejected_result.success = false;
+    rejected_result.message = "Second tare requested before previous tare complete.";
+    gh.setRejected(rejected_result);
   }
-  active_goal_ = gh;
-  active_goal_.setAccepted();
-  feedback_.requested = true;
-  sensor_.tare();
+  else {
+    active_goal_ = gh;
+    active_goal_.setAccepted();
+    feedback_.requested = true;
+    sensor_.tare();
+  }
 }
 
 PLUGINLIB_EXPORT_CLASS(pr_ros_controllers::ForceTorqueTareController, controller_interface::ControllerBase)

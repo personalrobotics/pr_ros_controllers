@@ -2,7 +2,7 @@
 ---
 # result
 bool success
+string message
 ---
 # feedback
 bool requested
-bool finished
