@@ -3,11 +3,7 @@ project(pr_ros_controllers)
 
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS 
-  actionlib
   controller_interface 
-  libbarrett_ros
-  pluginlib 
-  pr_control_msgs
   rosconsole
   roscpp
 )
@@ -20,7 +16,6 @@ link_directories(${Boost_LIBRARY_DIRS} ${catkin_LIBRARY_DIRS})
 catkin_package(
   CATKIN_DEPENDS
     controller_interface
-    pr_control_msgs
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
 )
@@ -29,7 +24,6 @@ add_library(${PROJECT_NAME}
   src/pr_joint_position_controller.cpp
   src/pr_joint_velocity_controller.cpp
   src/joint_mode_controller.cpp
-  src/forcetorque_tare_controller.cpp
 )
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
