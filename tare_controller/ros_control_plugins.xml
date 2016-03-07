@@ -1,0 +1,10 @@
+<library path="lib/libtare_controller">
+
+  <class name="tare_controller/TareController"
+         type="tare_controller::TareController"
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+    </description>
+  </class>
+
+</library>

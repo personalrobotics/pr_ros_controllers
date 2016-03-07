@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>pr_hardware_interfaces</name>
+  <version>0.0.0</version>
+  <description>The pr_hardware_interfaces package</description>
+
+  <maintainer email="cliddick@cmu.edu">Clint Liddick</maintainer>
+
+  <license>TODO</license>
+  <author email="cliddick@cmu.edu">Clint Liddick</author>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+</package>
