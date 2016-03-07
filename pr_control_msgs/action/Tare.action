@@ -4,5 +4,4 @@
 bool success
 string message
 ---
-# feedback
-bool requested
+# no feedback
