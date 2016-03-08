@@ -16,17 +16,20 @@ std::string getLeafNamespace(const ros::NodeHandle& nh)
 } // namespace
 
 
-template <class HardwareInterface>
-bool TareController<HardwareInterface>::
-init(HardwareInterface* hw,
-     ros::NodeHandle&   root_nh,
-     ros::NodeHandle&   controller_nh)
+bool TareController::init(TareInterface* hw,
+                          ros::NodeHandle& root_nh,
+                          ros::NodeHandle& controller_nh)
 {
   using namespace internal;
 
   controller_nh_ = controller_nh;
   name_ = getLeafNamespace(controller_nh_);
-  hw_ = hw; //->getHandle(name_); // TODO try/catch?
+  try {
+    tare_handle_ = hw->getHandle(name_); // TODO try/catch?
+  } catch(const std::logic_error& e) {
+    ROS_ERROR_STREAM_NAMED(name_, "Unable to initizize controller '" << name_ << "'. " << e.what());
+    return false;
+  }
 
   ROS_DEBUG_STREAM_NAMED(name_, "Initialized controller '" << name_ << "' with:" <<
 			 "\n- Hardware interface type: '" << this->getHardwareInterfaceType() <<
@@ -46,21 +49,17 @@ init(HardwareInterface* hw,
   return true;
 }
 
-template <class HardwareInterface>
-void TareController<HardwareInterface>::
-update(const ros::Time& time, const ros::Duration& period)
+void TareController::update(const ros::Time& time, const ros::Duration& period)
 {
-  if (tare_requested_.load() && hw_->getHandle(name_).isTareComplete()) { // TODO not right (valid)
+  if (tare_requested_.load() && tare_handle_.isTareComplete()) { // TODO not right (valid)
     result_->success = true;
     result_->message = "Tare completed.";
     rt_active_goal_->setSucceeded(result_);
-    tare_requested_.store(0);
+    tare_requested_.store(false);
   }
 }
 
-template <class HardwareInterface>
-void TareController<HardwareInterface>::
-goalCB(GoalHandle gh)
+void TareController::goalCB(GoalHandle gh)
 {
   ROS_DEBUG_STREAM_NAMED(name_, "Recieved new tare request.");
 
@@ -85,13 +84,13 @@ goalCB(GoalHandle gh)
     RealtimeGoalHandlePtr rt_goal(new RealtimeGoalHandle(gh));
 
     gh.setAccepted();
-    hw_->getHandle(name_).tare();
+    tare_handle_.tare();
 
     result_->success = false;
     result_->message = "Action accepted";
 
     rt_active_goal_ = rt_goal;
-    tare_requested_.store(1);
+    tare_requested_.store(true);
   }
 }
 

@@ -13,13 +13,17 @@
 #include <realtime_tools/realtime_server_goal_handle.h>
 #include <ros/node_handle.h>
 
-// TODO check boost atomic lock free macro
+
+#if BOOST_ATOMIC_BOOL_LOCK_FREE != 2
+  #error "Boolean not atomic on this system. Lock-free operations not possible."
+#endif
 
 namespace tare_controller 
 {
 
-template<class HardwareInterface>
-class TareController : public controller_interface::Controller<HardwareInterface>
+using pr_hardware_interfaces::TareInterface;
+
+class TareController : public controller_interface::Controller<TareInterface>
 {
 public:
 
@@ -28,7 +32,7 @@ public:
   
   /** \name Non Real-Time Safe Functions
    *\{*/
-  bool init(HardwareInterface* hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
+  bool init(TareInterface* hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
   /*\}*/
   
   /** \name Real-Time Safe Functions
@@ -37,7 +41,7 @@ public:
   /*\}*/
 
   // realtime_tools::RealtimeBuffer<bool> tare_requested_;
-  boost::atomic<int> tare_requested_;
+  boost::atomic<bool> tare_requested_;
 
 private:
 
@@ -48,15 +52,15 @@ private:
   typedef boost::shared_ptr<RealtimeGoalHandle>                                 RealtimeGoalHandlePtr;
 
   std::string name_;
-  HardwareInterface* hw_;
+  pr_hardware_interfaces::TareHandle tare_handle_;
 
   RealtimeGoalHandlePtr rt_active_goal_;
   pr_control_msgs::TareResultPtr result_;
 
   ros::Duration action_monitor_period_;
 
-  ros::NodeHandle    controller_nh_;
-  ActionServerPtr    action_server_;
+  ros::NodeHandle controller_nh_;
+  ActionServerPtr action_server_;
 
   void goalCB(GoalHandle gh);
 

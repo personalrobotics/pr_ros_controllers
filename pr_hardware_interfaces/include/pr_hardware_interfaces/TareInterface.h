@@ -28,8 +28,7 @@ public:
 
   void tare()
   {
-    assert(tare_state_);
-    if (*tare_state_ != TARE_REQUESTED) { // ignore double tares
+    if (isTareComplete()) { // ignore double tares
       *tare_state_ = TARE_REQUESTED;
     }
   }
@@ -45,7 +44,7 @@ private:
   TareState* tare_state_;
 };
 
-class ForceTorqueTareInterface :
+class TareInterface :
     public hardware_interface::HardwareResourceManager<TareHandle, hardware_interface::ClaimResources>{};
 
 }
