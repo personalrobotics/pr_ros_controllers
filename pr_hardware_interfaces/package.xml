@@ -9,7 +9,6 @@
   <license>TODO</license>
   <author email="cliddick@cmu.edu">Clint Liddick</author>
 
-
   <buildtool_depend>catkin</buildtool_depend>
 
   <export>

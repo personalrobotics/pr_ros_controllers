@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>tare_controller</name>
   <version>0.0.0</version>
   <description>Controller package for taring actions</description>
@@ -11,20 +11,12 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>actionlib</build_depend>
-  <build_depend>actionlib_msgs</build_depend>
-  <build_depend>controller_interface</build_depend>
-  <build_depend>pr_control_msgs</build_depend>
-  <build_depend>pr_hardware_interfaces</build_depend>
-  <build_depend>realtime_tools</build_depend>
-
-  <run_depend>actionlib</run_depend>
-  <run_depend>actionlib_msgs</run_depend>
-  <run_depend>controller_interface</run_depend>
-  <run_depend>pr_control_msgs</run_depend>
-  <run_depend>pr_hardware_interfaces</run_depend>
-  <run_depend>realtime_tools</run_depend>
-
+  <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>controller_interface</depend>
+  <depend>pr_control_msgs</depend>
+  <depend>pr_hardware_interfaces</depend>
+  <depend>realtime_tools</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
