@@ -3,33 +3,31 @@
 
 namespace tare_controller
 {
-namespace internal
-{
-
-std::string getLeafNamespace(const ros::NodeHandle& nh)
-{
-  const std::string complete_ns = nh.getNamespace();
-  std::size_t id   = complete_ns.find_last_of("/");
-  return complete_ns.substr(id + 1);
-}
-
-} // namespace
 
 
 bool TareController::init(TareInterface* hw,
                           ros::NodeHandle& root_nh,
                           ros::NodeHandle& controller_nh)
 {
-  using namespace internal;
-
   controller_nh_ = controller_nh;
-  name_ = getLeafNamespace(controller_nh_);
+
+  if (!controller_nh_.getParam("tare_name", name_)) {
+    ROS_ERROR("Failed loading resource name from 'tare_name' parameter.");
+    return false;
+  }
+
   try {
-    tare_handle_ = hw->getHandle(name_); // TODO try/catch?
+    tare_handle_ = hw->getHandle(name_);
   } catch(const std::logic_error& e) {
     ROS_ERROR_STREAM_NAMED(name_, "Unable to initizize controller '" << name_ << "'. " << e.what());
     return false;
   }
+
+  double action_monitor_rate = 20.0;
+  controller_nh_.getParam("action_monitor_rate", action_monitor_rate);
+  action_monitor_period_ = ros::Duration(1.0 / action_monitor_rate);
+  ROS_DEBUG_STREAM_NAMED(name_, "Action status changes will be monitored at " <<
+                         action_monitor_rate << "Hz.");
 
   ROS_DEBUG_STREAM_NAMED(name_, "Initialized controller '" << name_ << "' with:" <<
 			 "\n- Hardware interface type: '" << this->getHardwareInterfaceType() <<
@@ -51,7 +49,8 @@ bool TareController::init(TareInterface* hw,
 
 void TareController::update(const ros::Time& time, const ros::Duration& period)
 {
-  if (tare_requested_.load() && tare_handle_.isTareComplete()) { // TODO not right (valid)
+  if (tare_requested_.load() && tare_handle_.isTareComplete()) {
+    ROS_DEBUG_STREAM_NAMED(name_, "Tare complete.");
     result_->success = true;
     result_->message = "Tare completed.";
     rt_active_goal_->setSucceeded(result_);
@@ -89,8 +88,13 @@ void TareController::goalCB(GoalHandle gh)
     result_->success = false;
     result_->message = "Action accepted";
 
+    service_update_timer_ = controller_nh_.createTimer(action_monitor_period_,
+                                                       &RealtimeGoalHandle::runNonRealtime,
+                                                       rt_goal);
+
     rt_active_goal_ = rt_goal;
     tare_requested_.store(true);
+    ROS_DEBUG_STREAM_NAMED(name_, "Tare action accepted.");
   }
 }
 

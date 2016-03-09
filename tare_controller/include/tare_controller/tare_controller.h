@@ -18,7 +18,7 @@
   #error "Boolean not atomic on this system. Lock-free operations not possible."
 #endif
 
-namespace tare_controller 
+namespace tare_controller
 {
 
 using pr_hardware_interfaces::TareInterface;
@@ -29,12 +29,12 @@ public:
 
   TareController() {}
   ~TareController() {}
-  
+
   /** \name Non Real-Time Safe Functions
    *\{*/
   bool init(TareInterface* hw, ros::NodeHandle& root_nh, ros::NodeHandle& controller_nh);
   /*\}*/
-  
+
   /** \name Real-Time Safe Functions
    *\{*/
   void update(const ros::Time& time, const ros::Duration& period);
@@ -57,6 +57,7 @@ private:
   RealtimeGoalHandlePtr rt_active_goal_;
   pr_control_msgs::TareResultPtr result_;
 
+  ros::Timer service_update_timer_;
   ros::Duration action_monitor_period_;
 
   ros::NodeHandle controller_nh_;
