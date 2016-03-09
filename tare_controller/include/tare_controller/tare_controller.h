@@ -14,8 +14,9 @@
 #include <ros/node_handle.h>
 
 
-#if BOOST_ATOMIC_BOOL_LOCK_FREE != 2
-  #error "Boolean not atomic on this system. Lock-free operations not possible."
+// Ensure atomic integers operations are always lock-free (defined to 2)
+#if BOOST_ATOMIC_INT_LOCK_FREE != 2
+  #error "Integer atomics not lock-free on this system."
 #endif
 
 namespace tare_controller
@@ -40,8 +41,6 @@ public:
   void update(const ros::Time& time, const ros::Duration& period);
   /*\}*/
 
-  // realtime_tools::RealtimeBuffer<bool> tare_requested_;
-  boost::atomic<bool> tare_requested_;
 
 private:
 
@@ -54,7 +53,8 @@ private:
   std::string name_;
   pr_hardware_interfaces::TareHandle tare_handle_;
 
-  RealtimeGoalHandlePtr rt_active_goal_;
+  boost::atomic<pr_hardware_interfaces::TareState> tare_state_;
+  RealtimeGoalHandlePtr rt_goal_;
   pr_control_msgs::TareResultPtr result_;
 
   ros::Timer service_update_timer_;

@@ -4,6 +4,9 @@
 namespace tare_controller
 {
 
+using pr_hardware_interfaces::TARE_IDLE;
+using pr_hardware_interfaces::TARE_REQUESTED;
+using pr_hardware_interfaces::TARE_PENDING;
 
 bool TareController::init(TareInterface* hw,
                           ros::NodeHandle& root_nh,
@@ -11,8 +14,8 @@ bool TareController::init(TareInterface* hw,
 {
   controller_nh_ = controller_nh;
 
-  if (!controller_nh_.getParam("tare_name", name_)) {
-    ROS_ERROR("Failed loading resource name from 'tare_name' parameter.");
+  if (!controller_nh_.getParam("tare_handle_name", name_)) {
+    ROS_ERROR("Failed loading resource name from 'tare_handle_name' parameter.");
     return false;
   }
 
@@ -23,8 +26,8 @@ bool TareController::init(TareInterface* hw,
     return false;
   }
 
-  double action_monitor_rate = 20.0;
-  controller_nh_.getParam("action_monitor_rate", action_monitor_rate);
+  double action_monitor_rate;
+  controller_nh_.param("action_monitor_rate", action_monitor_rate, 20.0);
   action_monitor_period_ = ros::Duration(1.0 / action_monitor_rate);
   ROS_DEBUG_STREAM_NAMED(name_, "Action status changes will be monitored at " <<
                          action_monitor_rate << "Hz.");
@@ -49,18 +52,35 @@ bool TareController::init(TareInterface* hw,
 
 void TareController::update(const ros::Time& time, const ros::Duration& period)
 {
-  if (tare_requested_.load() && tare_handle_.isTareComplete()) {
-    ROS_DEBUG_STREAM_NAMED(name_, "Tare complete.");
+  pr_hardware_interfaces::TareState tare_state = tare_state_.load();
+
+  if (tare_state == TARE_REQUESTED) {
+    if (tare_handle_.isTareComplete()) {
+      rt_goal_->gh_.setAccepted();
+      tare_handle_.tare();
+      tare_state_.store(TARE_PENDING);
+    }
+    else {
+      // Should never enter this block
+      ROS_WARN_STREAM_NAMED(name_, "Tare handle '" << tare_handle_.getName() <<
+                            "' has tare pending when expected to be idle.");
+      result_->success = false;
+      result_->message = "Tare already pending."; // TODO race condition on result_ because of timer?
+      rt_goal_->gh_.setRejected(*result_);
+    }
+  }
+  else if (tare_state == TARE_PENDING && tare_handle_.isTareComplete()) {
     result_->success = true;
     result_->message = "Tare completed.";
-    rt_active_goal_->setSucceeded(result_);
-    tare_requested_.store(false);
+    rt_goal_->setSucceeded(result_);
+    tare_state_.store(TARE_IDLE);
   }
 }
 
 void TareController::goalCB(GoalHandle gh)
 {
   ROS_DEBUG_STREAM_NAMED(name_, "Recieved new tare request.");
+  pr_hardware_interfaces::TareState tare_state = tare_state_.load();
 
   // Precondition: Running controller
   if (!this->isRunning()) {
@@ -71,7 +91,7 @@ void TareController::goalCB(GoalHandle gh)
     gh.setRejected(result);
   }
   // Precondition: Tare not already pending
-  else if (tare_requested_.load()) {
+  else if (tare_state != TARE_IDLE) {
     ROS_WARN_NAMED(name_, "Tare already pending, cannot preempt tare requets.");
     pr_control_msgs::TareResult result;
     result.success = false;
@@ -79,21 +99,12 @@ void TareController::goalCB(GoalHandle gh)
     gh.setRejected(result);
   }
   else {
-    // Try to update goal
-    RealtimeGoalHandlePtr rt_goal(new RealtimeGoalHandle(gh));
-
-    gh.setAccepted();
-    tare_handle_.tare();
-
-    result_->success = false;
-    result_->message = "Action accepted";
+    rt_goal_.reset(new RealtimeGoalHandle(gh));
+    tare_state_.store(TARE_REQUESTED);
 
     service_update_timer_ = controller_nh_.createTimer(action_monitor_period_,
                                                        &RealtimeGoalHandle::runNonRealtime,
-                                                       rt_goal);
-
-    rt_active_goal_ = rt_goal;
-    tare_requested_.store(true);
+                                                       rt_goal_);
     ROS_DEBUG_STREAM_NAMED(name_, "Tare action accepted.");
   }
 }

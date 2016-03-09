@@ -12,7 +12,7 @@ class TareHandle
 {
 public:
   TareHandle()
-    : tare_state_(0)
+    : tare_state_(NULL)
   {}
 
   TareHandle(const std::string& name, TareState* tare_state)
