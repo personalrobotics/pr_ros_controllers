@@ -11,6 +11,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <pr_control_msgs/TareAction.h>
 #include <realtime_tools/realtime_server_goal_handle.h>
+#include <realtime_tools/realtime_box.h>
 #include <ros/node_handle.h>
 
 
@@ -50,12 +51,12 @@ private:
   typedef realtime_tools::RealtimeServerGoalHandle<pr_control_msgs::TareAction> RealtimeGoalHandle;
   typedef boost::shared_ptr<RealtimeGoalHandle>                                 RealtimeGoalHandlePtr;
 
-  std::string name_;
+
+  std::string controller_name_;
   pr_hardware_interfaces::TareHandle tare_handle_;
 
   boost::atomic<pr_hardware_interfaces::TareState> tare_state_;
-  RealtimeGoalHandlePtr rt_goal_;
-  pr_control_msgs::TareResultPtr result_;
+  realtime_tools::RealtimeBox<RealtimeGoalHandlePtr> rt_goal_;
 
   ros::Timer service_update_timer_;
   ros::Duration action_monitor_period_;
@@ -68,7 +69,5 @@ private:
 };
 
 } // namespace
-
-#include <tare_controller/tare_controller_impl.h>
 
 #endif // header guard
