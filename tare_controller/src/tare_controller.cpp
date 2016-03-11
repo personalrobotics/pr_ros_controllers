@@ -4,7 +4,7 @@
 namespace tare_controller
 {
 
-namespace internal
+namespace
 {
 std::string getLeafNamespace(const ros::NodeHandle& nh)
 {
@@ -24,11 +24,11 @@ bool TareController::init(TareInterface* hw,
                           ros::NodeHandle& controller_nh)
 {
   controller_nh_ = controller_nh;
-  controller_name_ = internal::getLeafNamespace(controller_nh_);
+  controller_name_ = getLeafNamespace(controller_nh_);
 
   std::string tare_handle_name;
   if (!controller_nh_.getParam("tare_handle_name", tare_handle_name)) {
-    ROS_ERROR("Failed loading resource name from 'tare_handle_name' parameter.");
+    ROS_ERROR_NAMED(controller_name_, "Failed loading resource name from 'tare_handle_name' parameter.");
     return false;
   }
 
@@ -101,6 +101,9 @@ void TareController::goalCB(GoalHandle gh)
     gh.setAccepted();
 
     RealtimeGoalHandlePtr rt_tmp_gh(new RealtimeGoalHandle(gh));
+    // A RealtimeBox is used because shared_ptr is not thread-safe for reset and access
+    // operations. We access the same shared_ptr (not a copy) from multiple threads here.
+    // In C++11 the atomic functions of std::shared_ptr could be used instead.
     rt_goal_.set(rt_tmp_gh);
     tare_state_.store(TARE_REQUESTED);
 

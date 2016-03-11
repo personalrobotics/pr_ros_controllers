@@ -4,6 +4,7 @@
          type="tare_controller::TareController"
          base_class_type="controller_interface::ControllerBase">
     <description>
+      ros_controller for taring (zeroing) sensors. Takes a pr_hardware_interface::TareInterface as hardware input.
     </description>
   </class>
 
