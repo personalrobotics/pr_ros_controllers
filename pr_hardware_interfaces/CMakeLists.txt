@@ -1,22 +1,22 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pr_hardware_interfaces)
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS hardware_interface)
 # find_package(Boost REQUIRED COMPONENTS system)
 
 catkin_package(
  INCLUDE_DIRS include
- LIBRARIES ${PACKAGE_NAME}
-#  CATKIN_DEPENDS other_catkin_pkg
+ LIBRARIES ${PROJECT_NAME}
+ CATKIN_DEPENDS hardware_interface
 #  DEPENDS system_lib
 )
 
 include_directories(include)
 
 ## Declare a C++ library
-# add_library(pr_hardware_interfaces
-#   src/${PROJECT_NAME}/pr_hardware_interfaces.cpp
-# )
+add_library(${PROJECT_NAME}
+  src/TareInterface.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -24,9 +24,9 @@ include_directories(include)
 # add_dependencies(pr_hardware_interfaces ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+)
 
 ## Mark executables and/or libraries for installation
 # install(TARGETS ${PROJECT_NAME}

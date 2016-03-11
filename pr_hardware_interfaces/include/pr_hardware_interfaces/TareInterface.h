@@ -11,33 +11,13 @@ namespace pr_hardware_interfaces {
 class TareHandle
 {
 public:
-  TareHandle()
-    : tare_state_(NULL)
-  {}
-
-  TareHandle(const std::string& name, TareState* tare_state)
-    : name_(name)
-    , tare_state_(tare_state)
-  {
-    if (!tare_state_) {
-      throw hardware_interface::HardwareInterfaceException("Cannot create handle '" + name + "'. Tare command pointer is null.");
-    }
-  }
+  TareHandle();
+  TareHandle(const std::string& name, TareState* tare_state);
 
   std::string getName() const {return name_;}
 
-  void tare()
-  {
-    if (isTareComplete()) { // ignore double tares
-      *tare_state_ = TARE_REQUESTED;
-    }
-  }
-
-  bool isTareComplete()
-  {
-    assert(tare_state_);
-    return *tare_state_ == TARE_IDLE;
-  }
+  void tare();
+  bool isTareComplete();
 
 private:
   std::string name_;
