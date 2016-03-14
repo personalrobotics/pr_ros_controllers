@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>pr_control_msgs</name>
+  <version>0.0.0</version>
+  <description>Messages for the pr_ros_controllers package</description>
+
+  <maintainer email="cliddick@cmu.edu">Clint Liddick</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>actionlib_msgs</depend>
+  <depend>std_msgs</depend>
+
+</package>
