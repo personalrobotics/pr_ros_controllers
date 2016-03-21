@@ -15,6 +15,7 @@ include_directories(include)
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
+  src/PositionCommandInterface.cpp
   src/TareInterface.cpp
 )
 

@@ -3,20 +3,26 @@ project(pr_control_msgs)
 
 find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
+  sensor_msgs
   std_msgs
 )
 
 add_action_files(
   DIRECTORY action
-  FILES Tare.action
+  FILES
+    Tare.action
+    SetPosition.action
 )
 
 generate_messages(DEPENDENCIES
   actionlib_msgs
+  sensor_msgs
   std_msgs
 )
 
 catkin_package(
   CATKIN_DEPENDS
     actionlib_msgs
+    sensor_msgs
+    std_msgs
 )

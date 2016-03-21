@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>position_command_controller</name>
+  <version>0.0.0</version>
+  <description>Controller package for sending grouped position commands</description>
+  
+  <maintainer email="cliddick@cmu.edu">Clint Liddick</maintainer>
+  
+  <license>BSD</license>
+  <author email="cliddick@cmu.edu">Clint Liddick</author>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>controller_interface</depend>
+  <depend>pr_control_msgs</depend>
+  <depend>pr_hardware_interfaces</depend>
+  <depend>realtime_tools</depend>
+  
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <controller_interface plugin="${prefix}/ros_control_plugins.xml"/>
+  </export>
+</package>
