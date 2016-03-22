@@ -5,7 +5,6 @@ using namespace position_command_controller;
 
 namespace
 {
-// TODO refactor into own function
 std::string getLeafNamespace(const ros::NodeHandle& nh)
 {
   const std::string complete_ns = nh.getNamespace();
@@ -121,3 +120,5 @@ void PositionCommandController::goalCB(GoalHandle gh)
     ROS_DEBUG_STREAM_NAMED(controller_name_, "Position command accepted.");
   }
 }
+
+PLUGINLIB_EXPORT_CLASS(position_command_controller::PositionCommandController, controller_interface::ControllerBase);

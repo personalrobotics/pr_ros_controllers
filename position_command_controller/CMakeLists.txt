@@ -17,7 +17,7 @@ find_package(Boost REQUIRED)
 
 catkin_package(
 INCLUDE_DIRS include
-LIBRARIES tare_controller
+LIBRARIES ${PROJECT_NAME}
 CATKIN_DEPENDS
     actionlib
     actionlib_msgs
@@ -68,7 +68,7 @@ install(FILES ros_control_plugins.xml
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_tare_controller.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_position_command_controller.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
