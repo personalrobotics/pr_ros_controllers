@@ -1,4 +1,4 @@
-<library path="lib/libtare_controller">
+<library path="lib/libposition_command_controller">
 
   <class name="position_command_controller/PositionCommandController"
          type="position_command_controller::PositionCommandController"

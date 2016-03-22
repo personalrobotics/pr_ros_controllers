@@ -139,3 +139,5 @@ void PositionCommandController::goalCB(GoalHandle gh)
     }
   }
 }
+
+PLUGINLIB_EXPORT_CLASS(position_command_controller::PositionCommandController, controller_interface::ControllerBase);
