@@ -12,7 +12,7 @@
 #include <realtime_tools/realtime_box.h>
 #include <ros/node_handle.h>
 
-// Ensure atomic integers operations are always lock-free (defined to 2)
+// Ensure atomic integer operations are always lock-free (defined to 2)
 #if BOOST_ATOMIC_INT_LOCK_FREE != 2
   #error "Integer atomics not lock-free on this system."
 #endif

@@ -3,7 +3,7 @@
 
 namespace pr_hardware_interfaces {
 
-enum MoveState { IDLE, MOVE_REQUESTED, MOVING };
+enum MoveState { IDLE, MOVE_REQUESTED, MOVING, IN_ERROR };
 
 }
 
