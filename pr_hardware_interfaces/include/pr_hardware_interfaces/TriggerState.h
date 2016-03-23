@@ -1,0 +1,10 @@
+#ifndef PR_HARDWARE_INTERFACE_TRIGGERSTATE_H_
+#define PR_HARDWARE_INTERFACE_TRIGGERSTATE_H_
+
+namespace pr_hardware_interfaces {
+
+enum TriggerState { TRIGGER_IDLE, TRIGGER_REQUESTED, TRIGGER_PENDING };
+
+}
+
+#endif
