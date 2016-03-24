@@ -73,8 +73,9 @@ void PositionCommandController::update(const ros::Time &time, const ros::Duratio
         // check command validity
         // TODO command range?
         rt_tmp_gh->preallocated_result_->success = false;
-        rt_tmp_gh->preallocated_result_->message = "Commanded position does not match Degrees of Freedom.";
+        rt_tmp_gh->preallocated_result_->message = "Commanded position does not match degrees of freedom.";
         rt_tmp_gh->setAborted(rt_tmp_gh->preallocated_result_);
+        move_state_.store(IDLE);
       }
       else {
         // Execute command
@@ -89,6 +90,7 @@ void PositionCommandController::update(const ros::Time &time, const ros::Duratio
       rt_tmp_gh->preallocated_result_->success = false;
       rt_tmp_gh->preallocated_result_->message = "Command failed. Hardware moving unexpectedly.";
       rt_tmp_gh->setAborted(rt_tmp_gh->preallocated_result_);
+      move_state_.store(IDLE);
     }
   }
   else if (move_state == MOVING && cmd_handle_.isDoneMoving()) {
@@ -101,6 +103,7 @@ void PositionCommandController::update(const ros::Time &time, const ros::Duratio
     rt_tmp_gh->preallocated_result_->success = false;
     rt_tmp_gh->preallocated_result_->message = "Command failed. Hardware in unexpected state.";
     rt_tmp_gh->setAborted(rt_tmp_gh->preallocated_result_);
+    move_state_.store(IDLE);  // hope for the best next cycle
   }
 }
                                          

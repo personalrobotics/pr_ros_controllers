@@ -2,7 +2,7 @@
 <package format="2">
   <name>position_command_controller</name>
   <version>0.0.0</version>
-  <description>Controller package for sending grouped position commands</description>
+  <description>Controller package for sending grouped position commands to stateful hardware</description>
   
   <maintainer email="cliddick@cmu.edu">Clint Liddick</maintainer>
   

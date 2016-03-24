@@ -4,7 +4,7 @@
          type="position_command_controller::PositionCommandController"
          base_class_type="controller_interface::ControllerBase">
     <description>
-      ros_controller for commanding sets of positions. Takes a pr_hardware_interface::PositionCommandInterface as hardware input.
+      ros_controller for commanding positions of stateful hardware. Takes a pr_hardware_interface::PositionCommandInterface as hardware input.
     </description>
   </class>
 
