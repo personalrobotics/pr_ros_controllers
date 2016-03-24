@@ -27,14 +27,16 @@ PositionCommandHandle::PositionCommandHandle(const std::string& name,
   }
 }
 
-void PositionCommandHandle::setCommand(const std::vector<double> &commanded_position)
+bool PositionCommandHandle::SetCommand(const std::vector<double> &commanded_position)
 {
   if (*move_state_ != IDLE) {
-    throw HardwareInterfaceException("Cannot command position while moving.");
+    // Cannot command position while moving
+    return false;
   }
-  
+
   if (commanded_position.size() != position_command_->size()) {
-    throw HardwareInterfaceException("Commanded position length does not match hardware DOF");
+    // Commanded position length does not match hardware DOF
+    return false;
   }
 
   for (unsigned int i=0; i < commanded_position.size(); ++i) {
@@ -42,6 +44,7 @@ void PositionCommandHandle::setCommand(const std::vector<double> &commanded_posi
   }
 
   *move_state_ = MOVE_REQUESTED;
+  return true;
 }
 
 bool PositionCommandHandle::isDoneMoving()

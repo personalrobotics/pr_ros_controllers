@@ -5,14 +5,14 @@ using namespace position_command_controller;
 
 namespace
 {
-std::string getLeafNamespace(const ros::NodeHandle& nh)
-{
-  const std::string complete_ns = nh.getNamespace();
-  std::size_t id   = complete_ns.find_last_of("/");
-  return complete_ns.substr(id + 1);
-}
+  std::string getLeafNamespace(const ros::NodeHandle& nh)
+  {
+    const std::string complete_ns = nh.getNamespace();
+    std::size_t id   = complete_ns.find_last_of("/");
+    return complete_ns.substr(id + 1);
+  }
 } // namespace
-  
+
 using pr_hardware_interfaces::MoveState;
 using pr_hardware_interfaces::IDLE;
 using pr_hardware_interfaces::MOVE_REQUESTED;
@@ -80,8 +80,15 @@ void PositionCommandController::update(const ros::Time &time, const ros::Duratio
       else {
         // Execute command
         // TODO correct command position order by names
-        cmd_handle_.setCommand(goal->command.position);
-        move_state_.store(MOVING);
+        if (!cmd_handle_.setCommand(goal->command.position)) {
+          rt_tmp_gh->preallocated_result_->success = false;
+          rt_tmp_gh->preallocated_result_->message = "Command rejected by hardware interface.";
+          rt_tmp_gh->setAborted(rt_tmp_gh->preallocated_result_);
+          move_state_.store(IDLE);
+        }
+        else {
+          move_state_.store(MOVING);
+        }
       }
     }
     else {
@@ -106,7 +113,7 @@ void PositionCommandController::update(const ros::Time &time, const ros::Duratio
     move_state_.store(IDLE);  // hope for the best next cycle
   }
 }
-                                         
+
 
 void PositionCommandController::goalCB(GoalHandle gh)
 {

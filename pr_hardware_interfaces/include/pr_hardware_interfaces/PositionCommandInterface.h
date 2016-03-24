@@ -19,7 +19,7 @@ public:
   size_t getNumDof() const {return position_command_->size();}
   MoveState getState() const {return *move_state_;}
 
-  void setCommand(const std::vector<double> &commanded_position);
+  bool setCommand(const std::vector<double> &commanded_position);
   bool isDoneMoving();
 
 private:
