@@ -27,7 +27,7 @@ PositionCommandHandle::PositionCommandHandle(const std::string& name,
   }
 }
 
-bool PositionCommandHandle::SetCommand(const std::vector<double> &commanded_position)
+bool PositionCommandHandle::setCommand(const std::vector<double> &commanded_position)
 {
   if (*move_state_ != IDLE) {
     // Cannot command position while moving
