@@ -5,12 +5,12 @@ using namespace position_command_controller;
 
 namespace
 {
-  std::string getLeafNamespace(const ros::NodeHandle& nh)
-  {
-    const std::string complete_ns = nh.getNamespace();
-    std::size_t id   = complete_ns.find_last_of("/");
-    return complete_ns.substr(id + 1);
-  }
+std::string getLeafNamespace(const ros::NodeHandle& nh)
+{
+  const std::string complete_ns = nh.getNamespace();
+  std::size_t id   = complete_ns.find_last_of("/");
+  return complete_ns.substr(id + 1);
+}
 } // namespace
 
 using pr_hardware_interfaces::MoveState;
@@ -39,6 +39,8 @@ bool PositionCommandController::init(PositionCommandInterface *hw,
     ROS_ERROR_STREAM_NAMED(controller_name_, "Unable to initizize controller '" << controller_name_ << "'. " << e.what());
     return false;
   }
+  // get DOF size once to use in non-realtime thread
+  hw_dof_ = cmd_handle_.getNumDof();
 
   double action_monitor_rate;
   controller_nh_.param("action_monitor_rate", action_monitor_rate, 20.0);
@@ -64,38 +66,30 @@ void PositionCommandController::update(const ros::Time &time, const ros::Duratio
 {
   pr_hardware_interfaces::MoveState move_state = move_state_.load();
   RealtimeGoalHandlePtr rt_tmp_gh;
-  rt_goal_.get(rt_tmp_gh);
+  rt_gh_.get(rt_tmp_gh);
+  GoalConstPtr rt_tmp_goal;
+  rt_goal_.get(rt_tmp_goal);
 
   if (move_state == MOVE_REQUESTED) {
     if (cmd_handle_.isDoneMoving()) {
-      auto goal = rt_tmp_gh->gh_.getGoal();
-      if (goal->command.position.size() != cmd_handle_.getNumDof()) {
-        // check command validity
-        // TODO command range?
+      // Execute command
+      // TODO correct command position order by names
+      if (!cmd_handle_.setCommand(rt_tmp_goal->command.position)) {
         rt_tmp_gh->preallocated_result_->success = false;
-        rt_tmp_gh->preallocated_result_->message = "Commanded position does not match degrees of freedom.";
+        rt_tmp_gh->preallocated_result_->message = "Command rejected by hardware interface.";
         rt_tmp_gh->setAborted(rt_tmp_gh->preallocated_result_);
         move_state_.store(IDLE);
       }
       else {
-        // Execute command
-        // TODO correct command position order by names
-        if (!cmd_handle_.setCommand(goal->command.position)) {
-          rt_tmp_gh->preallocated_result_->success = false;
-          rt_tmp_gh->preallocated_result_->message = "Command rejected by hardware interface.";
-          rt_tmp_gh->setAborted(rt_tmp_gh->preallocated_result_);
-          move_state_.store(IDLE);
-        }
-        else {
-          move_state_.store(MOVING);
-        }
+        move_state_.store(MOVING);
       }
     }
     else {
       // UNEXPECTED STATE: another controller has triggered a command
       // TODO remove once task/hardware interface properly checks for IN_ERROR state
       rt_tmp_gh->preallocated_result_->success = false;
-      rt_tmp_gh->preallocated_result_->message = "Command failed. Hardware moving unexpectedly.";
+      rt_tmp_gh->preallocated_result_->message =
+        "Command failed because another command is in progress. Is another controller using this hardware?";
       rt_tmp_gh->setAborted(rt_tmp_gh->preallocated_result_);
       move_state_.store(IDLE);
     }
@@ -132,14 +126,24 @@ void PositionCommandController::goalCB(GoalHandle gh)
     if (move_state != IDLE) {
       pr_control_msgs::SetPositionResult result;
       result.success = false;
-      result.message = "Command pending and not interruptable.";
+      result.message = "Command rejected because another command is in progress.";
       gh.setRejected(result);
       ROS_DEBUG_STREAM_NAMED(controller_name_, "Position command rejected.");
     }
+    else if (gh.getGoal()->command.position.size() != hw_dof_) {
+      pr_control_msgs::SetPositionResult result;
+      result.success = false;
+      std::stringstream msg;
+      msg << "Commanded position length: " << gh.getGoal()->command.position.size()
+          << ", does not match degrees of freedom: " << hw_dof_;
+      result.message = msg.str();
+      gh.setRejected(result);
+    }
     else {
       gh.setAccepted();
-      RealtimeGoalHandlePtr rt_tmp_gh = boost::make_shared<RealtimeGoalHandle>(gh);
-      rt_goal_.set(rt_tmp_gh);
+      RealtimeGoalHandlePtr rt_tmp_gh(new RealtimeGoalHandle(gh));
+      rt_gh_.set(rt_tmp_gh);
+      rt_goal_.set(gh.getGoal());
       move_state_.store(MOVE_REQUESTED);
 
       service_update_timer_ = controller_nh_.createTimer(action_monitor_period_,

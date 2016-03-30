@@ -47,14 +47,18 @@ private:
   typedef actionlib::ActionServer<SetPositionAction>                  ActionServer;
   typedef boost::shared_ptr<ActionServer>                             ActionServerPtr;
   typedef ActionServer::GoalHandle                                    GoalHandle;
+  typedef pr_control_msgs::SetPositionGoal                            Goal;
+  typedef boost::shared_ptr<const Goal>                               GoalConstPtr;
   typedef realtime_tools::RealtimeServerGoalHandle<SetPositionAction> RealtimeGoalHandle;
   typedef boost::shared_ptr<RealtimeGoalHandle>                       RealtimeGoalHandlePtr;
 
   std::string controller_name_;
   pr_hardware_interfaces::PositionCommandHandle cmd_handle_;
+  size_t hw_dof_;
 
   boost::atomic<pr_hardware_interfaces::MoveState> move_state_;
-  realtime_tools::RealtimeBox<RealtimeGoalHandlePtr> rt_goal_;
+  realtime_tools::RealtimeBox<RealtimeGoalHandlePtr> rt_gh_;
+  realtime_tools::RealtimeBox<GoalConstPtr> rt_goal_;
 
   ros::Timer service_update_timer_;
   ros::Duration action_monitor_period_;
