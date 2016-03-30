@@ -112,8 +112,6 @@ void PositionCommandController::update(const ros::Time &time, const ros::Duratio
 void PositionCommandController::goalCB(GoalHandle gh)
 {
   ROS_DEBUG_NAMED(controller_name_, "Recieved new position command.");
-  pr_hardware_interfaces::MoveState move_state = move_state_.load();
-
   if (!this->isRunning()) {
     ROS_ERROR_NAMED(controller_name_, "Can't accept new action goals. Controller is not running.");
     pr_control_msgs::SetPositionResult result;
