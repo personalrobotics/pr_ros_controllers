@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(tare_controller)
+project(position_command_controller)
 
 find_package(catkin
   REQUIRED COMPONENTS
@@ -8,23 +8,20 @@ find_package(catkin
       controller_interface
       pr_control_msgs
       pr_hardware_interfaces
-      # hardware_interface
       realtime_tools
-      # controller_manager
 )
 
 find_package(Boost REQUIRED)
 
 catkin_package(
 INCLUDE_DIRS include
-LIBRARIES tare_controller
+LIBRARIES ${PROJECT_NAME}
 CATKIN_DEPENDS
     actionlib
     actionlib_msgs
     controller_interface
     pr_control_msgs
     pr_hardware_interfaces
-    # hardware_interface
     realtime_tools
 #  DEPENDS system_lib
 )
@@ -37,8 +34,7 @@ include_directories(
 
 ## Declare a cpp library
 add_library(${PROJECT_NAME}
-   src/tare_controller.cpp
-   include/tare_controller/tare_controller.h
+   src/PositionCommandController.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -70,7 +66,7 @@ install(FILES ros_control_plugins.xml
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_tare_controller.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_position_command_controller.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

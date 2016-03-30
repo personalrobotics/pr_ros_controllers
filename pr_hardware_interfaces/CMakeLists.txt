@@ -15,7 +15,8 @@ include_directories(include)
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  src/TareInterface.cpp
+  src/PositionCommandInterface.cpp
+  src/TriggerableInterface.cpp
 )
 
 ## Add cmake target dependencies of the library
