@@ -39,7 +39,7 @@ bool PositionCommandHandle::setCommand(const std::vector<double> &commanded_posi
     return false;
   }
 
-  for (unsigned int i=0; i < commanded_position.size(); ++i) {
+  for (size_t i=0; i < commanded_position.size(); ++i) {
     (*position_command_)[i] = commanded_position[i];
   }
 

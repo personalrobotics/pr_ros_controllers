@@ -42,6 +42,8 @@ bool PositionCommandController::init(PositionCommandInterface *hw,
   // get DOF size once to use in non-realtime thread
   hw_dof_ = cmd_handle_.getNumDof();
 
+  move_state_.store(IDLE);
+
   double action_monitor_rate;
   controller_nh_.param("action_monitor_rate", action_monitor_rate, 20.0);
   action_monitor_period_ = ros::Duration(1.0 / action_monitor_rate);
