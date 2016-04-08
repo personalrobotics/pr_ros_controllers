@@ -41,6 +41,8 @@ target_link_libraries(${PROJECT_NAME}
   ${Boost_LIBRARIES}
 )
 
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+
 ## Mark executables and/or libraries for installation
 install(TARGETS ${PROJECT_NAME}
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
