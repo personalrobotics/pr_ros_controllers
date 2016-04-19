@@ -54,7 +54,7 @@ bool PositionCommandController::init(PositionCommandInterface *hw,
                          controller_name_ << "' with:" << "\n- Hardware interface type: '" <<
                          this->getHardwareInterfaceType() << "'" << "\n");
 
-  action_server_.reset(new ActionServer(controller_nh_, "move_hand",
+  action_server_.reset(new ActionServer(controller_nh_, "set_position",
 					boost::bind(&PositionCommandController::goalCB, this, _1),
 					false));
   action_server_->start();
