@@ -10,8 +10,8 @@ find_package(catkin REQUIRED COMPONENTS
 add_action_files(
   DIRECTORY action
   FILES
-    Trigger.action
-    SetPosition.action
+    set_position.action
+    trigger.action
 )
 
 generate_messages(DEPENDENCIES
