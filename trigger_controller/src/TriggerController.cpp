@@ -35,7 +35,7 @@ bool TriggerController::init(TriggerableInterface* hw,
   try {
     triggerable_handle_ = hw->getHandle(resource_name);
   } catch(const std::logic_error& e) {
-    ROS_ERROR_STREAM_NAMED(controller_name_, "Unable to initizize controller '" << controller_name_ << "'. " << e.what());
+    ROS_ERROR_STREAM_NAMED(controller_name_, "Unable to initialize controller '" << controller_name_ << "'. " << e.what());
     return false;
   }
 
@@ -87,7 +87,6 @@ void TriggerController::update(const ros::Time& time, const ros::Duration& perio
 void TriggerController::goalCB(GoalHandle gh)
 {
   ROS_DEBUG_STREAM_NAMED(controller_name_, "Recieved new trigger request.");
-  pr_hardware_interfaces::TriggerState trigger_state = trigger_state_.load();
 
   // Precondition: Running controller
   if (!this->isRunning()) {
