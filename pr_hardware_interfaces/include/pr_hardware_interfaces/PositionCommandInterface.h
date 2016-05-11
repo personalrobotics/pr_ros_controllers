@@ -15,10 +15,9 @@ public:
                         MoveState *move_state,
                         std::vector<double> *position_command);
 
-  std::string getName() const {return name_;}
-  size_t getNumDof() const {return position_command_->size();}
-  MoveState getState() const {return *move_state_;}
-
+  std::string getName() const;
+  size_t getNumDof() const;
+  MoveState getState() const;
   bool setCommand(const std::vector<double> &commanded_position);
   bool isDoneMoving();
 

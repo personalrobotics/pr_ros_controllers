@@ -14,8 +14,7 @@ public:
   TriggerableHandle();
   TriggerableHandle(const std::string& name, TriggerState* trigger_state);
 
-  std::string getName() const {return name_;}
-
+  std::string getName() const;
   void trigger();
   bool isTriggerComplete();
 

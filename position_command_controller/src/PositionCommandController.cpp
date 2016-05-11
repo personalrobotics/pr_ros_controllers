@@ -27,7 +27,6 @@ bool PositionCommandController::init(PositionCommandInterface *hw,
   controller_name_ = getLeafNamespace(controller_nh_);
 
   std::string cmd_handle_name;
-  // TODO use "resource_name" in other controllers as well
   if (!controller_nh_.getParam("resource_name", cmd_handle_name)) {
     ROS_ERROR_NAMED(controller_name_, "Failed loading resource name from 'resource_name' parameter.");
     return false;
@@ -48,7 +47,7 @@ bool PositionCommandController::init(PositionCommandInterface *hw,
   controller_nh_.param("action_monitor_rate", action_monitor_rate, 20.0);
   action_monitor_period_ = ros::Duration(1.0 / action_monitor_rate);
   ROS_DEBUG_STREAM_NAMED(controller_name_, "Action status changes will be monitored at " <<
-                         action_monitor_rate << "Hz.");
+                         action_monitor_rate << " Hz.");
 
   ROS_DEBUG_STREAM_NAMED(controller_name_, "Initialized controller '" <<
                          controller_name_ << "' with:" << "\n- Hardware interface type: '" <<

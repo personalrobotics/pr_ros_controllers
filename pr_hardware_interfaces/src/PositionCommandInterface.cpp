@@ -27,6 +27,12 @@ PositionCommandHandle::PositionCommandHandle(const std::string& name,
   }
 }
 
+std::string PositionCommandHandle::getName() const {return name_;}
+
+size_t PositionCommandHandle::getNumDof() const {return position_command_->size();}
+
+MoveState PositionCommandHandle::getState() const {return *move_state_;}
+
 bool PositionCommandHandle::setCommand(const std::vector<double> &commanded_position)
 {
   if (*move_state_ != IDLE) {

@@ -16,6 +16,8 @@ TriggerableHandle::TriggerableHandle(const std::string& name, TriggerState* trig
   }
 }
 
+std::string TriggerableHandle::getName() const {return name_;}
+
 void TriggerableHandle::trigger()
 {
   if (isTriggerComplete()) { // ignore double triggers

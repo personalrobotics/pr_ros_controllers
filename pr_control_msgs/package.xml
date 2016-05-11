@@ -5,7 +5,7 @@
   <description>Messages for the pr_ros_controllers package</description>
 
   <maintainer email="cliddick@cmu.edu">Clint Liddick</maintainer>
-  <license>TODO</license>
+  <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
 

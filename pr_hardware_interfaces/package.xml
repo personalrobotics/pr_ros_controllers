@@ -6,7 +6,7 @@
 
   <maintainer email="cliddick@cmu.edu">Clint Liddick</maintainer>
 
-  <license>TODO</license>
+  <license>BSD</license>
   <author email="cliddick@cmu.edu">Clint Liddick</author>
 
   <buildtool_depend>catkin</buildtool_depend>

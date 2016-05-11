@@ -72,7 +72,7 @@ void TriggerController::update(const ros::Time& time, const ros::Duration& perio
     }
     else {
       rt_tmp_gh->preallocated_result_->success = false;
-      rt_tmp_gh->preallocated_result_->message = "Request already triggered.";
+      rt_tmp_gh->preallocated_result_->message = "A trigger request is already in progress.";
       rt_tmp_gh->setAborted(rt_tmp_gh->preallocated_result_);
     }
   }
