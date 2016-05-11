@@ -4,16 +4,18 @@ project(pr_ros_controllers)
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS 
   controller_interface 
-  pluginlib 
   rosconsole
   roscpp
 )
+
 find_package(Boost REQUIRED COMPONENTS system)
 
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS} ${catkin_LIBRARY_DIRS})
 
 catkin_package(
-  CATKIN_DEPENDS controller_interface
+  CATKIN_DEPENDS
+    controller_interface
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
 )

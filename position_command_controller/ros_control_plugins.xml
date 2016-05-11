@@ -1,0 +1,11 @@
+<library path="lib/libposition_command_controller">
+
+  <class name="position_command_controller/PositionCommandController"
+         type="position_command_controller::PositionCommandController"
+         base_class_type="controller_interface::ControllerBase">
+    <description>
+      ros_controller for commanding positions of stateful hardware. Takes a pr_hardware_interface::PositionCommandInterface as hardware input.
+    </description>
+  </class>
+
+</library>
