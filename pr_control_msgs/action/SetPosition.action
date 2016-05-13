@@ -1,6 +1,0 @@
-sensor_msgs/JointState command
----
-bool success
-string message
----
-# no feedback
