@@ -10,6 +10,9 @@ catkin_package(
 )
 
 include_directories(include)
+include_directories(SYSTEM
+  ${catkin_INCLUDE_DIRS}
+)
 
 add_library(${PROJECT_NAME}
   src/PositionCommandInterface.cpp
@@ -18,6 +21,10 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
+)
+
+add_definitions(
+  ${catkin_DEFINITIONS}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
