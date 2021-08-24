@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   controller_interface 
   rosconsole
   roscpp
+  pr_control_msgs
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -21,9 +22,9 @@ catkin_package(
 )
 
 add_library(${PROJECT_NAME}
-  src/pr_joint_position_controller.cpp
-  src/pr_joint_velocity_controller.cpp
-  src/joint_mode_controller.cpp
+  src/joint_group_position_controller.cpp
+  src/joint_group_velocity_controller.cpp
+  src/joint_group_effort_controller.cpp
 )
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
