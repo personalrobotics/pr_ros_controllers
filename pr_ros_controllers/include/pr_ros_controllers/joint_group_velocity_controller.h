@@ -4,7 +4,7 @@
  *  Copyright (c) 2008, Willow Garage, Inc.
  *  Copyright (c) 2012, hiDOF, Inc.
  *  Copyright (c) 2013, PAL Robotics, S.L.
- *  Copyright (c) 2014, Carnegie Mellon University
+ *  Copyright (c) 2014, Fraunhofer IPA
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -35,59 +35,29 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* requires:
-#include <ros/node_handle.h>
+#pragma once
+
+
+#include <pr_ros_controllers/forward_joint_group_command_controller.h>
 #include <hardware_interface/joint_command_interface.h>
-#include <controller_interface/controller.h>
-#include <std_msgs/Float64.h>
-*/
 
 namespace pr_ros_controllers
 {
-   
+
 /**
- * \brief PR Joint Position Controller (linear or angular)
+ * \brief Forward command controller for a set of velocity controlled joints (linear or angular).
  *
- * This class passes the commanded position down to the joint
+ * This class forwards the commanded velocities down to a set of joints.
  *
  * \section ROS interface
  *
- * \param type Must be "PrJointPositionController".
- * \param joint Name of the joint to control.
+ * \param type Must be "JointGroupVelocityController".
+ * \param joints List of names of the joints to control.
  *
  * Subscribes to:
- * - \b command (std_msgs::Float64) : The joint position to apply
+ * - \b command (std_msgs::Float64MultiArray) : The joint velocities to apply
  */
+typedef forward_command_controller::ForwardJointGroupCommandController<hardware_interface::VelocityJointInterface>
+        JointGroupVelocityController;
 
-class PrJointPositionController: public controller_interface::Controller<hardware_interface::PositionJointInterface>
-{
-public:
-  PrJointPositionController() : command_(0) {}
-  ~PrJointPositionController() {sub_command_.shutdown();}
-
-  bool init(hardware_interface::PositionJointInterface* hw, ros::NodeHandle &n)
-  {
-    std::string joint_name;
-    if (!n.getParam("joint", joint_name))
-    {
-      ROS_ERROR("No joint given (namespace: %s)", n.getNamespace().c_str());
-      return false;
-    }
-
-    joint_ = hw->getHandle(joint_name);
-    sub_command_ = n.subscribe<std_msgs::Float64>("command", 1, &PrJointPositionController::commandCB, this);
-    return true;
-  }
-
-  void starting(const ros::Time& time) {command_ = joint_.getPosition();}
-  void update(const ros::Time& time, const ros::Duration& period) {joint_.setCommand(command_);}
-
-  hardware_interface::JointHandle joint_;
-  double command_;
-
-private:
-  ros::Subscriber sub_command_;
-  void commandCB(const std_msgs::Float64ConstPtr& msg) {command_ = msg->data;}
-};
-
-}; /* namespace pr_ros_controllers */
+}

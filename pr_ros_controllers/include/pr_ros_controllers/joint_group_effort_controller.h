@@ -4,6 +4,7 @@
  *  Copyright (c) 2008, Willow Garage, Inc.
  *  Copyright (c) 2012, hiDOF, Inc.
  *  Copyright (c) 2013, PAL Robotics, S.L.
+ *  Copyright (c) 2014, Fraunhofer IPA
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -34,13 +35,27 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <ros/node_handle.h>
-#include <hardware_interface/joint_command_interface.h>
-#include <controller_interface/controller.h>
-#include <std_msgs/Float64.h>
+#pragma once
 
-#include <pr_ros_controllers/pr_joint_position_controller.h>
 
-#include <pluginlib/class_list_macros.h>
+#include <pr_ros_controllers/forward_joint_group_command_controller.h>
 
-PLUGINLIB_EXPORT_CLASS(pr_ros_controllers::PrJointPositionController,controller_interface::ControllerBase)
+namespace pr_ros_controllers
+{
+
+/**
+ * \brief Forward command controller for a set of effort controlled joints (torque or force).
+ *
+ * This class forwards the commanded efforts down to a set of joints.
+ *
+ * \section ROS interface
+ *
+ * \param type Must be "JointGroupEffortController".
+ * \param joints List of names of the joints to control.
+ *
+ * Subscribes to:
+ * - \b command (std_msgs::Float64MultiArray) : The joint efforts to apply
+ */
+typedef forward_command_controller::ForwardJointGroupCommandController<hardware_interface::EffortJointInterface>
+        JointGroupEffortController;
+}

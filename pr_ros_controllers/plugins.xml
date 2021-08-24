@@ -1,34 +1,26 @@
 <library path="lib/libpr_ros_controllers">
 
-  <class name="pr_ros_controllers/PrJointPositionController"
-      type="pr_ros_controllers::PrJointPositionController"
+  <class name="pr_ros_controllers/JointPositionController"
+      type="pr_ros_controllers::JointPositionController"
       base_class_type="controller_interface::ControllerBase">
     <description>
-      The PrJointPositionController tracks position commands. It expects a PositionJointInterface type of hardware interface.
+      The JointPositionController tracks position commands. It expects a PositionJointInterface and is compatible with JointModeInterface.
     </description>
   </class>
   
-  <class name="pr_ros_controllers/PrJointVelocityController"
-      type="pr_ros_controllers::PrJointVelocityController"
+  <class name="pr_ros_controllers/JointVelocityController"
+      type="pr_ros_controllers::JointVelocityController"
       base_class_type="controller_interface::ControllerBase">
     <description>
-      The PrJointVelocityController tracks Velocity commands. It expects a VelocityJointInterface type of hardware interface.
+      The JointVelocityController tracks Velocity commands. It expects a VelocityJointInterface and is compatible with JointModeInterface.
     </description>
   </class>
 
-  <class name="pr_ros_controllers/JointModeController"
-      type="pr_ros_controllers::JointModeController"
+  <class name="pr_ros_controllers/JointEffortController"
+      type="pr_ros_controllers::JointEffortController"
       base_class_type="controller_interface::ControllerBase">
     <description>
-      Controller to allow joint controllers to easily switch modes between position, velocity, and effort-based control
-    </description>
-  </class>
-
-  <class name="pr_ros_controllers/ForceTorqueTareController"
-         type="pr_ros_controllers::ForceTorqueTareController"
-         base_class_type="controller_interface::ControllerBase">
-    <description>
-      Controller to send tare commands to a force torque sensor.
+      The JointEffortController tracks Effort commands. It expects a EffortJointInterface and is compatible with JointModeInterface.
     </description>
   </class>
 
