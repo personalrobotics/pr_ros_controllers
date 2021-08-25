@@ -46,13 +46,17 @@ void forward_command_controller::ForwardJointGroupCommandController<T>::starting
     mode_handle_->setMode(hardware_interface::JointCommandModes::MODE_POSITION);
   }
 
+  ROS_INFO_STREAM_NAMED(name_, "Start Position Controller");
+
   // Start controller with current joint positions
   std::vector<double> & commands = *commands_buffer_.readFromRT();
   for(unsigned int i=0; i<joints_.size(); i++)
   {
     commands[i]=joints_[i].getPosition();
     default_commands_[i] = commands[i];
+    ROS_INFO_STREAM_NAMED(name_, "Joint " << i << ": " << commands[i]);
   }
+  commands_buffer_.writeFromNonRT(default_commands_);
 }
 
 template <class T>

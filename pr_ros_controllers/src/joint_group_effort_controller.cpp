@@ -46,6 +46,8 @@ void forward_command_controller::ForwardJointGroupCommandController<T>::starting
     mode_handle_->setMode(hardware_interface::JointCommandModes::MODE_EFFORT);
   }
 
+  ROS_INFO_STREAM_NAMED(name_, "Starting Effort Controller");
+
   // Start controller with 0.0 efforts
   commands_buffer_.readFromRT()->assign(n_joints_, 0.0);
 }

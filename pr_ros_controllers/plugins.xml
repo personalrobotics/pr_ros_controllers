@@ -1,26 +1,26 @@
 <library path="lib/libpr_ros_controllers">
 
-  <class name="pr_ros_controllers/JointPositionController"
-      type="pr_ros_controllers::JointPositionController"
+  <class name="pr_ros_controllers/JointGroupPositionController"
+      type="pr_ros_controllers::JointGroupPositionController"
       base_class_type="controller_interface::ControllerBase">
     <description>
-      The JointPositionController tracks position commands. It expects a PositionJointInterface and is compatible with JointModeInterface.
+      The JointGroupPositionController tracks position commands. It expects a PositionJointInterface and is compatible with JointModeInterface.
     </description>
   </class>
   
-  <class name="pr_ros_controllers/JointVelocityController"
-      type="pr_ros_controllers::JointVelocityController"
+  <class name="pr_ros_controllers/JointGroupVelocityController"
+      type="pr_ros_controllers::JointGroupVelocityController"
       base_class_type="controller_interface::ControllerBase">
     <description>
-      The JointVelocityController tracks Velocity commands. It expects a VelocityJointInterface and is compatible with JointModeInterface.
+      The JointGroupVelocityController tracks Velocity commands. It expects a VelocityJointInterface and is compatible with JointModeInterface.
     </description>
   </class>
 
-  <class name="pr_ros_controllers/JointEffortController"
-      type="pr_ros_controllers::JointEffortController"
+  <class name="pr_ros_controllers/JointGroupEffortController"
+      type="pr_ros_controllers::JointGroupEffortController"
       base_class_type="controller_interface::ControllerBase">
     <description>
-      The JointEffortController tracks Effort commands. It expects a EffortJointInterface and is compatible with JointModeInterface.
+      The JointGroupEffortController tracks Effort commands. It expects a EffortJointInterface and is compatible with JointModeInterface.
     </description>
   </class>
 
