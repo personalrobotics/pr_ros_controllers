@@ -7,6 +7,8 @@ find_package(catkin REQUIRED COMPONENTS
   rosconsole
   roscpp
   pr_control_msgs
+  actionlib
+  actionlib_msgs
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -17,6 +19,8 @@ link_directories(${Boost_LIBRARY_DIRS} ${catkin_LIBRARY_DIRS})
 catkin_package(
   CATKIN_DEPENDS
     controller_interface
+    actionlib
+    actionlib_msgs
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
 )
