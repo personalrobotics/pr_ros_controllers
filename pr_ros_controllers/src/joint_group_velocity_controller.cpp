@@ -4,6 +4,7 @@
  *  Copyright (c) 2008, Willow Garage, Inc.
  *  Copyright (c) 2012, hiDOF, Inc.
  *  Copyright (c) 2013, PAL Robotics, S.L.
+ *  Copyright (c) 2014, Fraunhofer IPA
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -34,13 +35,38 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <ros/node_handle.h>
-#include <hardware_interface/joint_command_interface.h>
-#include <controller_interface/controller.h>
-#include <std_msgs/Float64.h>
+#include <pr_ros_controllers/joint_group_velocity_controller.h>
+#include <pluginlib/class_list_macros.hpp>
 
-#include <pr_ros_controllers/pr_joint_position_controller.h>
+template <class T>
+void forward_command_controller::ForwardJointGroupCommandController<T>::starting(const ros::Time& time)
+{
+  // Switch joint mode if mode handle provided
+  if(mode_handle_) {
+    mode_handle_->setMode(hardware_interface::JointCommandModes::MODE_VELOCITY);
+  }
 
-#include <pluginlib/class_list_macros.h>
+  ROS_INFO_STREAM_NAMED(name_, "Starting Velocity Controller");
 
-PLUGINLIB_EXPORT_CLASS(pr_ros_controllers::PrJointPositionController,controller_interface::ControllerBase)
+  // Start controller with 0.0 velocities
+  commands_buffer_.readFromRT()->assign(n_joints_, 0.0);
+}
+
+template <class T>
+void forward_command_controller::ForwardJointGroupCommandController<T>::updateDefaultCommand()
+{
+  // Set default to 0
+  for(unsigned int i=0; i<joints_.size(); i++)
+  {
+    default_commands_[i] = 0.0;
+  }
+}
+
+template <class T>
+void forward_command_controller::ForwardJointGroupCommandController<T>::goalCB(GoalHandle gh)
+{
+  // Set as position command
+  setGoal(gh, gh.getGoal()->command.velocities);
+}
+
+PLUGINLIB_EXPORT_CLASS(pr_ros_controllers::JointGroupVelocityController,controller_interface::ControllerBase)

@@ -4,6 +4,7 @@
  *  Copyright (c) 2008, Willow Garage, Inc.
  *  Copyright (c) 2012, hiDOF, Inc.
  *  Copyright (c) 2013, PAL Robotics, S.L.
+ *  Copyright (c) 2014, Fraunhofer IPA
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -34,13 +35,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <ros/node_handle.h>
-#include <hardware_interface/joint_command_interface.h>
-#include <controller_interface/controller.h>
-#include <std_msgs/Float64.h>
+#include <pr_ros_controllers/joint_group_position_controller.h>
+#include <pluginlib/class_list_macros.hpp>
 
-#include <pr_ros_controllers/pr_joint_velocity_controller.h>
+template <class T>
+void forward_command_controller::ForwardJointGroupCommandController<T>::starting(const ros::Time& time)
+{
+  // Switch joint mode if mode handle provided
+  if(mode_handle_) {
+    mode_handle_->setMode(hardware_interface::JointCommandModes::MODE_POSITION);
+  }
 
-#include <pluginlib/class_list_macros.h>
+  ROS_INFO_STREAM_NAMED(name_, "Start Position Controller");
 
-PLUGINLIB_EXPORT_CLASS(pr_ros_controllers::PrJointVelocityController,controller_interface::ControllerBase)
+  // Start controller with current joint positions
+  std::vector<double> & commands = *commands_buffer_.readFromRT();
+  for(unsigned int i=0; i<joints_.size(); i++)
+  {
+    commands[i]=joints_[i].getPosition();
+    default_commands_[i] = commands[i];
+    ROS_INFO_STREAM_NAMED(name_, "Joint " << i << ": " << commands[i]);
+  }
+  commands_buffer_.writeFromNonRT(default_commands_);
+}
+
+template <class T>
+void forward_command_controller::ForwardJointGroupCommandController<T>::updateDefaultCommand()
+{
+  // Set default to current position
+  for(unsigned int i=0; i<joints_.size(); i++)
+  {
+    default_commands_[i] = joints_[i].getPosition();
+  }
+}
+
+template <class T>
+void forward_command_controller::ForwardJointGroupCommandController<T>::goalCB(GoalHandle gh)
+{
+  // Set as position command
+  setGoal(gh, gh.getGoal()->command.positions);
+}
+
+PLUGINLIB_EXPORT_CLASS(pr_ros_controllers::JointGroupPositionController,controller_interface::ControllerBase)

@@ -1,21 +1,21 @@
-<package>
+<?xml version="1.0"?>
+<package format="2">
   <name>pr_ros_controllers</name>
   <version>0.0.0</version>
   <description>pr_ros_controllers</description>
-  <maintainer email="cdellin@gmail.com">Chris Dellin</maintainer>
+  <maintainer email="ekgordon@cs.uw.edu">Ethan K. Gordon</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>controller_interface</build_depend>
-  <build_depend>rosconsole</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>std_msgs</build_depend>
-
-  <run_depend>controller_interface</run_depend>
-  <run_depend>rosconsole</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>std_msgs</run_depend>
+  <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>controller_interface</depend>
+  <depend>hardware_interface</depend>
+  <depend>rosconsole</depend>
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>pr_control_msgs</depend>
 
   <export>
     <controller_interface plugin="${prefix}/plugins.xml"/>
