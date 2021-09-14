@@ -37,14 +37,95 @@
 #include <pr_ros_controllers/joint_mode_controller.h>
 #include <pluginlib/class_list_macros.hpp>
 
-bool ForwardJointGroupCommandController<HardwareInterface>::init(hardware_interface::JointModeInterface* jmi,
-                                                                    ros::NodeHandle&   n)
+namespace pr_ros_controllers
 {
-    // Get Joint 
-    if(jmt && n.getParam("mode_handle", handle_name)) {
-      ROS_DEBUG_STREAM_NAMED(name_, "Enabling joint mode handling.");
-      mode_handle_.reset(new hardware_interface::JointModeHandle(jmt->getHandle(handle_name)));
+
+namespace internal
+{
+// TODO: create a utils file?
+/**
+ * \return The map between \p t1 indices (implicitly encoded in return vector indices) to \t2 indices.
+ * If \p t1 is <tt>"{C, B}"</tt> and \p t2 is <tt>"{A, B, C, D}"</tt>, the associated mapping vector is
+ * <tt>"{2, 1}"</tt>.
+ */
+template <class T>
+inline std::vector<unsigned int> mapping(const T& t1, const T& t2)
+{
+  typedef unsigned int SizeType;
+
+  // t1 must be a subset of t2
+  if (t1.size() > t2.size()) {return std::vector<SizeType>();}
+
+  std::vector<SizeType> mapping_vector(t1.size()); // Return value
+  for (typename T::const_iterator t1_it = t1.begin(); t1_it != t1.end(); ++t1_it)
+  {
+    typename T::const_iterator t2_it = std::find(t2.begin(), t2.end(), *t1_it);
+    if (t2.end() == t2_it) {return std::vector<SizeType>();}
+    else
+    {
+      const SizeType t1_dist = std::distance(t1.begin(), t1_it);
+      const SizeType t2_dist = std::distance(t2.begin(), t2_it);
+      mapping_vector[t1_dist] = t2_dist;
     }
+  }
+  return mapping_vector;
+}
+
+inline hardware_interface::JointCommandModes modeFromString(std::string str) {
+  if(str == "BEGIN")
+    return hardware_interface::JointCommandModes::BEGIN;
+  if(str == "POSITION")
+    return hardware_interface::JointCommandModes::MODE_POSITION;
+  if(str == "VELOCITY")
+      return hardware_interface::JointCommandModes::MODE_VELOCITY;
+  if(str == "EFFORT")
+    return hardware_interface::JointCommandModes::MODE_EFFORT;
+  if(str == "NOMODE" || str == "OTHER")
+    return hardware_interface::JointCommandModes::NOMODE;
+  if(str == "EMERGENCY_STOP" || str == "ESTOP")
+    return hardware_interface::JointCommandModes::EMERGENCY_STOP;
+  if(str == "SWITCHING")
+      return hardware_interface::JointCommandModes::SWITCHING;
+  
+  // Else
+  ROS_WARN_STREAM("Setting unknown mode '" << str.c_str() << "' to ERROR.");
+  return hardware_interface::JointCommandModes::ERROR;
+}
+
+inline hardware_interface::JointCommandModes modeFromInt(int i) {
+  switch(i) {
+    case -1:
+      return hardware_interface::JointCommandModes::BEGIN;
+    case 0:
+      return hardware_interface::JointCommandModes::MODE_POSITION;
+    case 1:
+      return hardware_interface::JointCommandModes::MODE_VELOCITY;
+    case 2:
+      return hardware_interface::JointCommandModes::MODE_EFFORT;
+    case 3:
+      return hardware_interface::JointCommandModes::NOMODE;
+    case 4:
+      return hardware_interface::JointCommandModes::EMERGENCY_STOP;
+    case 5:
+      return hardware_interface::JointCommandModes::SWITCHING;
+    default:
+      ROS_WARN_STREAM("Setting unknown mode '" << i << "' to ERROR.");
+      return hardware_interface::JointCommandModes::ERROR;
+  }
+}
+
+inline std::string getLeafNamespace(const ros::NodeHandle& nh)
+{
+  const std::string complete_ns = nh.getNamespace();
+  std::size_t id   = complete_ns.find_last_of("/");
+  return complete_ns.substr(id + 1);
+}
+
+} // namespace internal
+
+bool JointModeController::init(hardware_interface::JointModeInterface* hw,
+                                ros::NodeHandle&   n)
+{
 
     // Cache controller node handle
     controller_nh_ = n;
@@ -73,12 +154,12 @@ bool ForwardJointGroupCommandController<HardwareInterface>::init(hardware_interf
     }
     
     // Clear joints_ first in case this is called twice
-    joints_.clear();
+    joint_modes_.clear();
     for(unsigned int i=0; i<n_joints_; i++)
     {
       try
       {
-        joints_.push_back(hw->getHandle(joint_names_[i]));
+        joint_modes_.push_back(hw->getHandle(joint_names_[i]));
       }
       catch (const hardware_interface::HardwareInterfaceException& e)
       {
@@ -87,34 +168,78 @@ bool ForwardJointGroupCommandController<HardwareInterface>::init(hardware_interf
       }
     }
 
-    commands_buffer_.writeFromNonRT(std::vector<double>(n_joints_, 0.0));
-    default_commands_.resize(n_joints_);
 
-    // ROS API: Subscribed topics
-    sub_command_ = n.subscribe<std_msgs::Float64MultiArray>("command", 1, &ForwardJointGroupCommandController::commandCB, this);
+    // Initialize default joint mode
+    param_name = "default";
+    std::string default_mode_str = "BEGIN";
+    n.getParam(param_name, default_mode_str);
+
+    commands_buffer_.writeFromNonRT(std::vector<hardware_interface::JointCommandModes>(n_joints_, internal::modeFromString(default_mode_str)));
 
     // ROS API: Action interface
-    action_server_.reset(new ActionServer(controller_nh_, "joint_group_command",
-                                        boost::bind(&ForwardJointGroupCommandController::goalCB,   this, _1),
-                                        boost::bind(&ForwardJointGroupCommandController::cancelCB, this, _1),
+    action_server_.reset(new ActionServer(controller_nh_, "joint_mode_command",
+                                        boost::bind(&JointModeController::goalCB,   this, _1),
+                                        boost::bind(&JointModeController::cancelCB, this, _1),
                                         false));
     action_server_->start();
 
-    // Add Joint Mode switching if handle provided
-    hardware_interface::JointModeInterface* jmt = robot_hw->get<hardware_interface::JointModeInterface>();
-    std::string handle_name;
-    if(jmt && n.getParam("mode_handle", handle_name)) {
-      ROS_DEBUG_STREAM_NAMED(name_, "Enabling joint mode handling.");
-      mode_handle_.reset(new hardware_interface::JointModeHandle(jmt->getHandle(handle_name)));
-    }
     return true;
 }
 
-template <class T>
-void forward_command_controller::ForwardJointGroupCommandController<T>::goalCB(GoalHandle gh)
+void JointModeController::goalCB(GoalHandle gh)
 {
-  // Set as position command
-  setGoal(gh, gh.getGoal()->command.velocities);
+  ROS_DEBUG_STREAM_NAMED(name_,"Received new action goal");
+  pr_control_msgs::JointModeCommandResult result;
+  std::vector<int> command = gh.getGoal()->modes;
+
+  // Preconditions
+  if (!this->isRunning())
+  {
+    result.message = "Can't accept new action goals. Controller is not running.";
+    ROS_ERROR_STREAM_NAMED(name_, result.message);
+    result.success = false;
+    gh.setRejected(result);
+    return;
+  }
+
+
+  if (gh.getGoal()->joint_names.size() != command.size()) {
+    result.message = "Size of command must match size of joint_names.";
+    ROS_ERROR_STREAM_NAMED(name_, result.message);
+    result.success = false;
+    gh.setRejected(result);
+    return;
+  }
+
+  // Goal should specify valid controller joints (they can be ordered differently). Reject if this is not the case
+  using internal::mapping;
+  std::vector<unsigned int> mapping_vector = mapping(gh.getGoal()->joint_names, joint_names_);
+
+  if (mapping_vector.size() != gh.getGoal()->joint_names.size())
+  {
+    result.message = "Joints on incoming goal don't match the controller joints.";
+    ROS_ERROR_STREAM_NAMED(name_, result.message);
+    result.success = false;
+    gh.setRejected(result);
+    return;
+  }
+
+  // Accept new goal
+  gh.setAccepted();
+
+  // update new command
+  std::vector< hardware_interface::JointCommandModes > new_commands(*commands_buffer_.readFromNonRT());
+  for(int i = 0; i < mapping_vector.size(); i++) {
+    new_commands[mapping_vector[i]] = internal::modeFromInt(command[i]);
+  }
+  commands_buffer_.writeFromNonRT(new_commands);
+
+  // Send successful result
+  result.message = "Success";
+  result.success = true;
+  gh.setSucceeded(result);
 }
+
+} // namespace joint_mode_controller
 
 PLUGINLIB_EXPORT_CLASS(pr_ros_controllers::JointModeController,controller_interface::ControllerBase)

@@ -47,18 +47,15 @@
 #include <actionlib/server/action_server.h>
 
 // ROS messages
-#include <pr_control_msgs/JointGroupCommandAction.h>
-#include <trajectory_msgs/JointTrajectoryPoint.h>
-#include <std_msgs/Float64MultiArray.h>
+#include <pr_control_msgs/JointModeCommandAction.h>
 
 // ros_controls
 #include <realtime_tools/realtime_server_goal_handle.h>
-#include <hardware_interface/joint_command_interface.h>
-#include <controller_interface/multi_interface_controller.h>
+#include <controller_interface/controller.h>
 #include <hardware_interface/joint_mode_interface.h>
 
 
-namespace joint_mode_controller
+namespace pr_ros_controllers
 {
 
 /**
@@ -70,6 +67,10 @@ namespace joint_mode_controller
  * \section ROS interface
  *
  * \param joints Names of the joints to control.
+ * \param default String of mode to initialize all joints.
+ *                Possible values: BEGIN, POSITION, VELOCITY, EFFORT, NOMODE, OTHER, SWITCHING
+ *                All other values will be converted to ERROR
+ * \see hardware_interface::JointCommandModes
  *
  */
 
@@ -79,13 +80,15 @@ public:
   JointModeController() : controller_interface::Controller<hardware_interface::JointModeInterface>() {}
   ~JointModeController() {}
 
-  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle &n);
+  bool init(hardware_interface::JointModeInterface* hw, ros::NodeHandle &n) override;
 
   void starting(const ros::Time& /*time*/) { /* Do Nothing */}
   void stopping(const ros::Time& /*time*/) { /* Do Nothing */}
   void update(const ros::Time& /*time*/, const ros::Duration& /*period*/)
   {
-    // Do Nothing
+    std::vector<hardware_interface::JointCommandModes> & commands = *commands_buffer_.readFromRT();
+    for(unsigned int i=0; i<n_joints_; i++)
+    {  joint_modes_[i].setMode(commands[i]); }
   }
 
 protected:
@@ -93,14 +96,12 @@ protected:
   typedef std::shared_ptr<ActionServer>                                                       ActionServerPtr;
   typedef ActionServer::GoalHandle                                                            GoalHandle;
 
-  realtime_tools::RealtimeBuffer<std::vector<double> > commands_buffer_;
-  std::vector<double> default_commands_; // Defaults to 0 on init, can override in starting()
+  realtime_tools::RealtimeBuffer< std::vector<hardware_interface::JointCommandModes> > commands_buffer_;
   unsigned int n_joints_;
 
-  std::vector< std::string >                     joint_names_;         ///< Controlled joint names.
-  std::vector< hardware_interface::JointHandle > joints_;              ///< Handle to controlled joint.
-  std::string                                    name_;               ///< Controller name.
-  RealtimeGoalHandlePtr                          rt_active_goal_;     ///< Currently active action goal, if any.
+  std::vector< std::string >                         joint_names_;    ///< Controlled joint names.
+  std::vector< hardware_interface::JointModeHandle > joint_modes_;    ///< Handle to controlled joint.
+  std::string                                        name_;           ///< Controller name.
 
   // ROS API
   ros::NodeHandle    controller_nh_;
@@ -108,9 +109,7 @@ protected:
   ros::Timer         goal_handle_timer_;
   ros::Duration      action_monitor_period_;
 
-  std::shared_ptr<hardware_interface::JointModeHandle> mode_handle_;
-
-  // Callback, immediately will 
+  // Callback, should immediately send result
   void goalCB(GoalHandle gh);
 
   // General callbacks
@@ -119,5 +118,3 @@ protected:
 };
 
 } // namespace
-
-#include <pr_ros_controllers/detail/forward_joint_group_command_controller_impl.h>
