@@ -24,5 +24,13 @@
     </description>
   </class>
 
+  <class name="pr_ros_controllers/JointModeController"
+      type="pr_ros_controllers::JointModeController"
+      base_class_type="controller_interface::ControllerBase">
+    <description>
+      The JointModeController sets the underlying RobotHW's Joint Command Mode. It expects a JointModeInterface.
+    </description>
+  </class>
+
 </library>
 

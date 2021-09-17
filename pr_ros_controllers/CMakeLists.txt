@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(pr_ros_controllers)
+cmake_minimum_required(VERSION 3.0.0)
+project(pr_ros_controllers VERSION 0.0.0)
 
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS 
@@ -29,6 +29,7 @@ add_library(${PROJECT_NAME}
   src/joint_group_position_controller.cpp
   src/joint_group_velocity_controller.cpp
   src/joint_group_effort_controller.cpp
+  src/joint_mode_controller.cpp
 )
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
