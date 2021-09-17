@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(pr_ros_controllers)
+cmake_minimum_required(VERSION 3.0.0)
+project(pr_ros_controllers VERSION 0.0.0)
 
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS 

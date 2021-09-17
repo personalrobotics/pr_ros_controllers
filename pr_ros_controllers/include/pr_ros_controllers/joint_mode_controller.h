@@ -113,7 +113,7 @@ protected:
   void goalCB(GoalHandle gh);
 
   // General callbacks
-  void cancelCB(GoalHandle gh) { /* Do Nothing */ }
+  void cancelCB(GoalHandle gh) { gh.setCanceled(); }
 
 };
 
