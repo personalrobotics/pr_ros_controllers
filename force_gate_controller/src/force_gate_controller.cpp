@@ -726,6 +726,23 @@ controller_interface::CallbackReturn ForceGateController::on_configure(
   // get parameters from the listener in case they were updated
   params_ = param_listener_->get_params();
 
+  // Update wrench tolerances if thresholding enabled
+  if (params_.wrench_threshold.topic != "")
+  {
+    RCLCPP_INFO(get_node()->get_logger(), "Updating Wrench Thresholds");
+    params_ = param_listener_->get_params();
+
+    wrench_tolerances_.timeout = rclcpp::Duration::from_seconds(params_.wrench_threshold.timeout);
+    wrench_tolerances_.forceTotal = params_.wrench_threshold.fMag;
+    wrench_tolerances_.forceVec[0] = params_.wrench_threshold.fx;
+    wrench_tolerances_.forceVec[1] = params_.wrench_threshold.fy;
+    wrench_tolerances_.forceVec[2] = params_.wrench_threshold.fz;
+    wrench_tolerances_.torqueTotal = params_.wrench_threshold.tMag;
+    wrench_tolerances_.torqueVec[0] = params_.wrench_threshold.tx;
+    wrench_tolerances_.torqueVec[1] = params_.wrench_threshold.ty;
+    wrench_tolerances_.torqueVec[2] = params_.wrench_threshold.tz;
+  }
+
   // Check if the DoF has changed
   if ((dof_ > 0) && (params_.joints.size() != dof_))
   {
@@ -975,7 +992,7 @@ controller_interface::CallbackReturn ForceGateController::on_configure(
   if (params_.wrench_threshold.topic != "")
   {
     wrench_subscriber_ = get_node()->create_subscription<geometry_msgs::msg::WrenchStamped>(
-      params_.wrench_threshold.topic, rclcpp::SystemDefaultsQoS(),
+      params_.wrench_threshold.topic, rclcpp::QoS(1).best_effort().durability_volatile(),
       [this](const geometry_msgs::msg::WrenchStamped::SharedPtr msg) { 
         rt_wrench_stamped_.writeFromNonRT(msg);
       });
@@ -1228,6 +1245,7 @@ rclcpp_action::GoalResponse ForceGateController::goal_received_callback(
   // Update wrench tolerances if thresholding enabled
   if (params_.wrench_threshold.topic != "")
   {
+    RCLCPP_INFO(get_node()->get_logger(), "Updating Wrench Thresholds");
     if (param_listener_->is_old(params_)) {
       params_ = param_listener_->get_params();
 
