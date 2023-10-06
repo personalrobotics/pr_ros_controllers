@@ -1,0 +1,7 @@
+<library path="moveit_ros_control_interface_trajectory_plugin">
+  <class name="force_gate_controller/ForceGateController" type="moveit_ros_control_interface::JointTrajectoryControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
+      <description>
+        ASDF
+      </description>
+  </class>
+</library>

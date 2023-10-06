@@ -23,6 +23,7 @@
   <depend>control_toolbox</depend>
   <depend>generate_parameter_library</depend>
   <depend>hardware_interface</depend>
+  <depend>moveit_ros_control_interface</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
   <depend>rsl</depend>

@@ -12,6 +12,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   controller_interface
   generate_parameter_library
   hardware_interface
+  moveit_ros_control_interface
   pluginlib
   rclcpp
   rclcpp_lifecycle
@@ -49,7 +50,8 @@ ament_target_dependencies(force_gate_controller PUBLIC ${THIS_PACKAGE_INCLUDE_DE
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(force_gate_controller PRIVATE "FORCE_GATE_CONTROLLER_BUILDING_DLL" "_USE_MATH_DEFINES")
-pluginlib_export_plugin_description_file(controller_interface force_gate_plugin.xml)
+pluginlib_export_plugin_description_file(controller_interface force_gate_controller_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_ros_control_interface force_gate_controller_allocator_plugin.xml)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
