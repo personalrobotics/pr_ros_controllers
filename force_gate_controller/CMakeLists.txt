@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(force_gate_controller LANGUAGES CXX)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)") 
   add_compile_options(-Wall -Wextra -Wconversion)
 endif()
 
@@ -12,13 +12,16 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   controller_interface
   generate_parameter_library
   hardware_interface
+  moveit_ros_control_interface
   pluginlib
+  position_controllers
   rclcpp
   rclcpp_lifecycle
   realtime_tools
   rsl
   tl_expected
   trajectory_msgs
+  velocity_controllers
 )
 
 find_package(ament_cmake REQUIRED)
@@ -34,7 +37,13 @@ generate_parameter_library(force_gate_controller_parameters
 
 add_library(force_gate_controller SHARED
   src/force_gate_controller.cpp
+  src/force_gate_parent.cpp
+  src/force_gate_position_controller.cpp
+  src/force_gate_velocity_controller.cpp
+  src/joint_trajectory_controller_plugin.cpp
+  src/tolerances.cpp
   src/trajectory.cpp
+  src/validate_jtc_parameters.cpp
 )
 target_compile_features(force_gate_controller PUBLIC cxx_std_17)
 target_include_directories(force_gate_controller PUBLIC
@@ -49,7 +58,8 @@ ament_target_dependencies(force_gate_controller PUBLIC ${THIS_PACKAGE_INCLUDE_DE
 # Causes the visibility macros to use dllexport rather than dllimport,
 # which is appropriate when building the dll but not consuming it.
 target_compile_definitions(force_gate_controller PRIVATE "FORCE_GATE_CONTROLLER_BUILDING_DLL" "_USE_MATH_DEFINES")
-pluginlib_export_plugin_description_file(controller_interface force_gate_plugin.xml)
+pluginlib_export_plugin_description_file(controller_interface force_gate_controller_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_ros_control_interface force_gate_controller_allocator_plugin.xml)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
