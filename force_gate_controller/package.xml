@@ -21,6 +21,7 @@
   <depend>controller_interface</depend>
   <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
+  <depend>forward_command_controller</depend>
   <depend>generate_parameter_library</depend>
   <depend>hardware_interface</depend>
   <depend>moveit_ros_control_interface</depend>

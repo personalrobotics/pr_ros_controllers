@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(force_gate_controller LANGUAGES CXX)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)") 
   add_compile_options(-Wall -Wextra -Wconversion)
 endif()
 
@@ -10,6 +10,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   control_toolbox
   controller_interface
+  forward_command_controller
   generate_parameter_library
   hardware_interface
   moveit_ros_control_interface
@@ -35,6 +36,8 @@ generate_parameter_library(force_gate_controller_parameters
 
 add_library(force_gate_controller SHARED
   src/force_gate_controller.cpp
+  src/force_gate_velocity_controller.cpp
+  src/force_gate_position_controller.cpp
   src/trajectory.cpp
 )
 target_compile_features(force_gate_controller PUBLIC cxx_std_17)
