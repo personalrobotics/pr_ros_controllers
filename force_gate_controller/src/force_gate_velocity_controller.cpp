@@ -54,6 +54,11 @@ controller_interface::return_type ForceGateVelocityController::update(
 {
     if (!check_wrench_threshold(get_node(), get_node()->now()))
     {
+        // stop all joints
+        for (auto & command_interface : command_interfaces_)
+        {
+          command_interface.set_value(0.0);
+        }
         return controller_interface::return_type::ERROR;
     }
     
