@@ -70,17 +70,21 @@ bool ForceGateParent::check_wrench_threshold(std::shared_ptr<rclcpp_lifecycle::L
     return true;
   }
 
+  // Throttle the warning messages
+  auto& clock = *node->get_clock();
+  int throttle_ms = 1000;
+
   // Read stamped wrench
   auto wrench_stamped = *rt_wrench_stamped_.readFromRT();
   if (!wrench_stamped) {
-    RCLCPP_WARN(node->get_logger(), "WrenchStamped not received.");
+    RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "WrenchStamped not received.");
     return false;
   }
   
   // Check all relevant tolerances
   if (wrench_tolerances_.timeout != rclcpp::Duration(0, 0)) {
     if (time - wrench_tolerances_.timeout > wrench_stamped->header.stamp) {
-      RCLCPP_WARN(node->get_logger(), "WrenchStamped timeout.");
+      RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "WrenchStamped timeout.");
       return false;
     }
   }
@@ -88,28 +92,28 @@ bool ForceGateParent::check_wrench_threshold(std::shared_ptr<rclcpp_lifecycle::L
   double forceSumSq = 0.0;
   if (wrench_tolerances_.forceVec[0] != 0.0) {
     if (wrench_stamped->wrench.force.x > wrench_tolerances_.forceVec[0]) {
-      RCLCPP_WARN(node->get_logger(), "Wrench: Fx violation.");
+      RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "Wrench: Fx violation.");
       return false;
     }
   }
   forceSumSq += wrench_stamped->wrench.force.x * wrench_stamped->wrench.force.x;
   if (wrench_tolerances_.forceVec[1] != 0.0) {
     if (wrench_stamped->wrench.force.y > wrench_tolerances_.forceVec[1]) {
-      RCLCPP_WARN(node->get_logger(), "Wrench: Fy violation.");
+      RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "Wrench: Fy violation.");
       return false;
     }
   }
   forceSumSq += wrench_stamped->wrench.force.y * wrench_stamped->wrench.force.y;
   if (wrench_tolerances_.forceVec[2] != 0.0) {
     if (wrench_stamped->wrench.force.z > wrench_tolerances_.forceVec[2]) {
-      RCLCPP_WARN(node->get_logger(), "Wrench: Fz violation.");
+      RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "Wrench: Fz violation.");
       return false;
     }
   }
   forceSumSq += wrench_stamped->wrench.force.z * wrench_stamped->wrench.force.z;
   if (wrench_tolerances_.forceTotal != 0.0) {
     if (forceSumSq > wrench_tolerances_.forceTotal*wrench_tolerances_.forceTotal) {
-      RCLCPP_WARN(node->get_logger(), "Wrench: ||F|| violation.");
+      RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "Wrench: ||F|| violation.");
       return false;
     }
   }
@@ -117,28 +121,28 @@ bool ForceGateParent::check_wrench_threshold(std::shared_ptr<rclcpp_lifecycle::L
   double torqueSumSq = 0.0;
   if (wrench_tolerances_.torqueVec[0] != 0.0) {
     if (wrench_stamped->wrench.torque.x > wrench_tolerances_.torqueVec[0]) {
-      RCLCPP_WARN(node->get_logger(), "Wrench: Tx violation.");
+      RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "Wrench: Tx violation.");
       return false;
     }
   }
   torqueSumSq += wrench_stamped->wrench.torque.x * wrench_stamped->wrench.torque.x;
   if (wrench_tolerances_.torqueVec[1] != 0.0) {
     if (wrench_stamped->wrench.torque.y > wrench_tolerances_.torqueVec[1]) {
-      RCLCPP_WARN(node->get_logger(), "Wrench: Ty violation.");
+      RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "Wrench: Ty violation.");
       return false;
     }
   }
   torqueSumSq += wrench_stamped->wrench.torque.y * wrench_stamped->wrench.torque.y;
   if (wrench_tolerances_.torqueVec[2] != 0.0) {
     if (wrench_stamped->wrench.torque.z > wrench_tolerances_.torqueVec[2]) {
-      RCLCPP_WARN(node->get_logger(), "Wrench: Tz violation.");
+      RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "Wrench: Tz violation.");
       return false;
     }
   }
   torqueSumSq += wrench_stamped->wrench.torque.z * wrench_stamped->wrench.torque.z;
   if (wrench_tolerances_.torqueTotal != 0.0) {
     if (torqueSumSq > wrench_tolerances_.torqueTotal*wrench_tolerances_.torqueTotal) {
-      RCLCPP_WARN(node->get_logger(), "Wrench: ||T|| violation.");
+      RCLCPP_WARN_THROTTLE(node->get_logger(), clock, throttle_ms, "Wrench: ||T|| violation.");
       return false;
     }
   }
