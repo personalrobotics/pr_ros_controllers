@@ -12,45 +12,54 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
+// #include <string>
 
 #include "controller_interface/controller_interface.hpp"
-#include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "force_gate_controller/force_gate_position_controller.hpp"
-#include "rclcpp/logging.hpp"
-#include "rclcpp/parameter.hpp"
+// #include "hardware_interface/types/hardware_interface_type_values.hpp"
+// #include "rclcpp/logging.hpp"
+// #include "rclcpp/parameter.hpp"
 
 namespace force_gate_controller
 {
 ForceGatePositionController::ForceGatePositionController()
-: forward_command_controller::ForwardCommandController()
+: position_controllers::JointGroupPositionController()
 {
-  interface_name_ = hardware_interface::HW_IF_POSITION;
 }
 
-controller_interface::CallbackReturn ForceGatePositionController::on_init()
+controller_interface::CallbackReturn ForceGatePositionController::read_parameters()
 {
-  auto ret = forward_command_controller::ForwardCommandController::on_init();
+  auto ret = position_controllers::JointGroupPositionController::read_parameters();
   if (ret != CallbackReturn::SUCCESS)
   {
-    return ret;
+      return ret;
   }
 
-  try
-  {
-    // Explicitly set the interface parameter declared by the forward_command_controller
-    // to match the value set in the ForceGatePositionController constructor.
-    get_node()->set_parameter(
-      rclcpp::Parameter("interface_name", hardware_interface::HW_IF_POSITION));
-  }
-  catch (const std::exception & e)
-  {
-    fprintf(stderr, "Exception thrown during init stage with message: %s \n", e.what());
-    return CallbackReturn::ERROR;
-  }
-
-  return CallbackReturn::SUCCESS;
+  return read_force_gate_parameters(get_node());
 }
+
+controller_interface::CallbackReturn ForceGatePositionController::on_activate(const rclcpp_lifecycle::State & previous_state)
+{
+  // When the controller is activated, get the most up-to-date wrench tolerances
+  auto ret = read_force_gate_parameters(get_node());
+  if (ret != CallbackReturn::SUCCESS)
+  {
+      return ret;
+  }
+  return position_controllers::JointGroupPositionController::on_activate(previous_state);
+}
+
+controller_interface::return_type ForceGatePositionController::update(
+  const rclcpp::Time & time, const rclcpp::Duration & period)
+{
+    if (!check_wrench_threshold(get_node(), get_node()->now()))
+    {
+        return controller_interface::return_type::ERROR;
+    }
+    
+    return position_controllers::JointGroupPositionController::update(time, period);
+}
+
 }  // namespace force_gate_controller
 
 #include "pluginlib/class_list_macros.hpp"

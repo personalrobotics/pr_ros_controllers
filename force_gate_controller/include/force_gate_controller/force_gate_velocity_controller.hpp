@@ -15,10 +15,13 @@
 #ifndef FORCE_GATE_CONTROLLER__FORCE_GATE_VELOCITY_CONTROLLER_HPP_
 #define FORCE_GATE_CONTROLLER__FORCE_GATE_VELOCITY_CONTROLLER_HPP_
 
-#include <string>
+// #include <string>
 
-#include "forward_command_controller/forward_command_controller.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
+#include "velocity_controllers/joint_group_velocity_controller.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
+#include "force_gate_controller/force_gate_parent.hpp"
+#include "force_gate_controller/tolerances.hpp"
 #include "force_gate_controller/visibility_control.h"
 
 namespace force_gate_controller
@@ -33,17 +36,21 @@ namespace force_gate_controller
  * Subscribes to:
  * - \b command (std_msgs::msg::Float64MultiArray) : The velocity commands to apply.
  */
-class ForceGateVelocityController : public forward_command_controller::ForwardCommandController
+class ForceGateVelocityController : public velocity_controllers::JointGroupVelocityController, public ForceGateParent
 {
 public:
   FORCE_GATE_CONTROLLER_PUBLIC
   ForceGateVelocityController();
 
-  FORCE_GATE_CONTROLLER_PUBLIC controller_interface::CallbackReturn on_init() override;
+  FORCE_GATE_CONTROLLER_PUBLIC
+  controller_interface::CallbackReturn on_activate(const rclcpp_lifecycle::State & previous_state) override;
 
   FORCE_GATE_CONTROLLER_PUBLIC
-  controller_interface::CallbackReturn on_deactivate(
-    const rclcpp_lifecycle::State & previous_state) override;
+  controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+
+protected:
+  // Overridden functions to read parameters from ROS.
+  controller_interface::CallbackReturn read_parameters() override;
 };
 
 }  // namespace force_gate_controller

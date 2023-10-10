@@ -12,58 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
+// #include <string>
 
 #include "controller_interface/controller_interface.hpp"
-#include "hardware_interface/types/hardware_interface_type_values.hpp"
-#include "rclcpp/logging.hpp"
-#include "rclcpp/parameter.hpp"
 #include "force_gate_controller/force_gate_velocity_controller.hpp"
+// #include "hardware_interface/types/hardware_interface_type_values.hpp"
+// #include "rclcpp/logging.hpp"
+// #include "rclcpp/parameter.hpp"
 
 namespace force_gate_controller
 {
 ForceGateVelocityController::ForceGateVelocityController()
-: forward_command_controller::ForwardCommandController()
+: velocity_controllers::JointGroupVelocityController()
 {
-  interface_name_ = hardware_interface::HW_IF_VELOCITY;
 }
 
-controller_interface::CallbackReturn ForceGateVelocityController::on_init()
+controller_interface::CallbackReturn ForceGateVelocityController::read_parameters()
 {
-  auto ret = ForwardCommandController::on_init();
+  auto ret = velocity_controllers::JointGroupVelocityController::read_parameters();
   if (ret != CallbackReturn::SUCCESS)
   {
-    return ret;
+      return ret;
   }
 
-  try
-  {
-    // Explicitly set the interface parameter declared by the forward_command_controller
-    // to match the value set in the ForceGateVelocityController constructor.
-    get_node()->set_parameter(
-      rclcpp::Parameter("interface_name", hardware_interface::HW_IF_VELOCITY));
-  }
-  catch (const std::exception & e)
-  {
-    fprintf(stderr, "Exception thrown during init stage with message: %s \n", e.what());
-    return CallbackReturn::ERROR;
-  }
-
-  return CallbackReturn::SUCCESS;
+  return read_force_gate_parameters(get_node());
 }
 
-controller_interface::CallbackReturn ForceGateVelocityController::on_deactivate(
-  const rclcpp_lifecycle::State & previous_state)
+controller_interface::CallbackReturn ForceGateVelocityController::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
-  auto ret = ForwardCommandController::on_deactivate(previous_state);
-
-  // stop all joints
-  for (auto & command_interface : command_interfaces_)
+  // When the controller is activated, get the most up-to-date wrench tolerances
+  auto ret = read_force_gate_parameters(get_node());
+  if (ret != CallbackReturn::SUCCESS)
   {
-    command_interface.set_value(0.0);
+      return ret;
   }
+  return velocity_controllers::JointGroupVelocityController::on_activate(previous_state);
+}
 
-  return ret;
+controller_interface::return_type ForceGateVelocityController::update(
+  const rclcpp::Time & time, const rclcpp::Duration & period)
+{
+    if (!check_wrench_threshold(get_node(), get_node()->now()))
+    {
+        return controller_interface::return_type::ERROR;
+    }
+    
+    return velocity_controllers::JointGroupVelocityController::update(time, period);
 }
 
 }  // namespace force_gate_controller

@@ -27,64 +27,10 @@
 
 /// \author Adolfo Rodriguez Tsouroukdissian
 
-#ifndef FORCE_GATE_CONTROLLER__TOLERANCES_HPP_
-#define FORCE_GATE_CONTROLLER__TOLERANCES_HPP_
-
-#include <cassert>
-#include <cmath>
-#include <string>
-#include <vector>
-
-#include "control_msgs/action/follow_joint_trajectory.hpp"
-#include "force_gate_controller_parameters.hpp"
-
-#include "rclcpp/node.hpp"
+#include "force_gate_controller/tolerances.hpp"
 
 namespace force_gate_controller
 {
-/**
- * \brief Trajectory state tolerances for force/torque.
- *
- * A tolerance value of zero means that no tolerance will be applied for that variable.
- */
-struct WrenchTolerances
-{
-  double forceTotal = 0.0;
-  double forceVec[3] = {0};
-  double torqueTotal = 0.0;
-  double torqueVec[3] = {0};
-  rclcpp::Duration timeout = rclcpp::Duration(0, 0);
-};
-
-/**
- * \brief Trajectory state tolerances for position, velocity and acceleration variables.
- *
- * A tolerance value of zero means that no tolerance will be applied for that variable.
- */
-struct StateTolerances
-{
-  double position = 0.0;
-  double velocity = 0.0;
-  double acceleration = 0.0;
-};
-
-/**
- * \brief Trajectory segment tolerances.
- */
-struct SegmentTolerances
-{
-  explicit SegmentTolerances(size_t size = 0) : state_tolerance(size), goal_state_tolerance(size) {}
-
-  /** State tolerances that apply during segment execution. */
-  std::vector<StateTolerances> state_tolerance;
-
-  /** State tolerances that apply for the goal state only.*/
-  std::vector<StateTolerances> goal_state_tolerance;
-
-  /** Extra time after the segment end time allowed to reach the goal state tolerances. */
-  double goal_time_tolerance = 0.0;
-};
-
 /**
  * \brief Populate trajectory segment tolerances using data from the ROS node.
  *
@@ -105,7 +51,33 @@ struct SegmentTolerances
  * \param params The ROS Parameters
  * \return Trajectory segment tolerances.
  */
-SegmentTolerances get_segment_tolerances(Params const & params);
+SegmentTolerances get_segment_tolerances(Params const & params)
+{
+  auto const & constraints = params.constraints;
+  auto const n_joints = params.joints.size();
+
+  SegmentTolerances tolerances;
+  tolerances.goal_time_tolerance = constraints.goal_time;
+
+  // State and goal state tolerances
+  tolerances.state_tolerance.resize(n_joints);
+  tolerances.goal_state_tolerance.resize(n_joints);
+  for (size_t i = 0; i < n_joints; ++i)
+  {
+    auto const joint = params.joints[i];
+    tolerances.state_tolerance[i].position = constraints.joints_map.at(joint).trajectory;
+    tolerances.goal_state_tolerance[i].position = constraints.joints_map.at(joint).goal;
+    tolerances.goal_state_tolerance[i].velocity = constraints.stopped_velocity_tolerance;
+
+    auto logger = rclcpp::get_logger("tolerance");
+    RCLCPP_DEBUG(
+      logger, "%s %f", (joint + ".trajectory").c_str(), tolerances.state_tolerance[i].position);
+    RCLCPP_DEBUG(
+      logger, "%s %f", (joint + ".goal").c_str(), tolerances.goal_state_tolerance[i].position);
+  }
+
+  return tolerances;
+}
 
 /**
  * \param state_error State error to check.
@@ -116,8 +88,51 @@ SegmentTolerances get_segment_tolerances(Params const & params);
  */
 bool check_state_tolerance_per_joint(
   const trajectory_msgs::msg::JointTrajectoryPoint & state_error, size_t joint_idx,
-  const StateTolerances & state_tolerance, bool show_errors);
+  const StateTolerances & state_tolerance, bool show_errors = false)
+{
+  using std::abs;
+  const double error_position = state_error.positions[joint_idx];
+  const double error_velocity =
+    state_error.velocities.empty() ? 0.0 : state_error.velocities[joint_idx];
+  const double error_acceleration =
+    state_error.accelerations.empty() ? 0.0 : state_error.accelerations[joint_idx];
+
+  const bool is_valid =
+    !(state_tolerance.position > 0.0 && abs(error_position) > state_tolerance.position) &&
+    !(state_tolerance.velocity > 0.0 && abs(error_velocity) > state_tolerance.velocity) &&
+    !(state_tolerance.acceleration > 0.0 && abs(error_acceleration) > state_tolerance.acceleration);
+
+  if (is_valid)
+  {
+    return true;
+  }
+
+  if (show_errors)
+  {
+    const auto logger = rclcpp::get_logger("tolerances");
+    RCLCPP_ERROR(logger, "Path state tolerances failed:");
+
+    if (state_tolerance.position > 0.0 && abs(error_position) > state_tolerance.position)
+    {
+      RCLCPP_ERROR(
+        logger, "Position Error: %f, Position Tolerance: %f", error_position,
+        state_tolerance.position);
+    }
+    if (state_tolerance.velocity > 0.0 && abs(error_velocity) > state_tolerance.velocity)
+    {
+      RCLCPP_ERROR(
+        logger, "Velocity Error: %f, Velocity Tolerance: %f", error_velocity,
+        state_tolerance.velocity);
+    }
+    if (
+      state_tolerance.acceleration > 0.0 && abs(error_acceleration) > state_tolerance.acceleration)
+    {
+      RCLCPP_ERROR(
+        logger, "Acceleration Error: %f, Acceleration Tolerance: %f", error_acceleration,
+        state_tolerance.acceleration);
+    }
+  }
+  return false;
+}
 
 }  // namespace force_gate_controller
-
-#endif  // FORCE_GATE_CONTROLLER__TOLERANCES_HPP_

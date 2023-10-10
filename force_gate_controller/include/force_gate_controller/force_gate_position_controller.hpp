@@ -15,16 +15,21 @@
 #ifndef FORCE_GATE_CONTROLLER__FORCE_GATE_POSITION_CONTROLLER_HPP_
 #define FORCE_GATE_CONTROLLER__FORCE_GATE_POSITION_CONTROLLER_HPP_
 
-#include <string>
+// #include <string>
 
-#include "forward_command_controller/forward_command_controller.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
+#include "position_controllers/joint_group_position_controller.hpp"
+#include "force_gate_controller/force_gate_parent.hpp"
 #include "force_gate_controller/visibility_control.h"
+#include "force_gate_controller/tolerances.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 
 namespace force_gate_controller
 {
 /**
- * \brief Forward command controller for a set of position controlled joints (linear or angular).
+ * \brief A force-gated version of the JointGroupPositionController.
+ * 
+ * Forward command controller for a set of position controlled joints (linear or angular).
  *
  * This class forwards the commanded positions down to a set of joints.
  *
@@ -33,13 +38,21 @@ namespace force_gate_controller
  * Subscribes to:
  * - \b commands (std_msgs::msg::Float64MultiArray) : The position commands to apply.
  */
-class ForceGatePositionController : public forward_command_controller::ForwardCommandController
+class ForceGatePositionController : public position_controllers::JointGroupPositionController, public ForceGateParent
 {
 public:
   FORCE_GATE_CONTROLLER_PUBLIC
   ForceGatePositionController();
 
-  FORCE_GATE_CONTROLLER_PUBLIC controller_interface::CallbackReturn on_init() override;
+  FORCE_GATE_CONTROLLER_PUBLIC
+  controller_interface::CallbackReturn on_activate(const rclcpp_lifecycle::State & previous_state) override;
+
+  FORCE_GATE_CONTROLLER_PUBLIC
+  controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+
+protected:
+  // Overridden functions to read parameters from ROS.
+  controller_interface::CallbackReturn read_parameters() override;
 };
 
 }  // namespace force_gate_controller
