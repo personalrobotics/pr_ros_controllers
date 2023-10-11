@@ -51,12 +51,14 @@ controller_interface::CallbackReturn ForceGateParent::read_force_gate_parameters
     wrench_tolerances_.torqueVec[1] = force_gate_params_.wrench_threshold.ty;
     wrench_tolerances_.torqueVec[2] = force_gate_params_.wrench_threshold.tz;
 
-    // Subscribe to wrench topic
-    wrench_subscriber_ = node->create_subscription<geometry_msgs::msg::WrenchStamped>(
-      force_gate_params_.wrench_threshold.topic, rclcpp::QoS(1).best_effort().durability_volatile(),
-      [this](const geometry_msgs::msg::WrenchStamped::SharedPtr msg) { 
-        rt_wrench_stamped_.writeFromNonRT(msg);
-    });
+    // Subscribe to wrench topic. The topic is read only, so won't be changed.
+    if (!wrench_subscriber_) {
+      wrench_subscriber_ = node->create_subscription<geometry_msgs::msg::WrenchStamped>(
+        force_gate_params_.wrench_threshold.topic, rclcpp::QoS(1).best_effort().durability_volatile(),
+        [this](const geometry_msgs::msg::WrenchStamped::SharedPtr msg) {
+          rt_wrench_stamped_.writeFromNonRT(msg);
+      });
+    }
   }
 
   return controller_interface::CallbackReturn::SUCCESS;
