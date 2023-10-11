@@ -1,5 +1,5 @@
-<library path="moveit_ros_control_interface_trajectory_plugin">
-  <class name="force_gate_controller/ForceGateController" type="moveit_ros_control_interface::JointTrajectoryControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
+<library path="force_gate_controller">
+  <class name="force_gate_controller/ForceGateController" type="force_gate_controller::JointTrajectoryControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
     <description>
       A ControllerAllocator for the force gates joint trajectory controller, to enable it to be controlled by MoveIt's Ros2ControlManager.
     </description>

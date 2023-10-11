@@ -34,15 +34,13 @@ generate_parameter_library(force_gate_controller_parameters
   src/force_gate_controller_parameters.yaml
   include/force_gate_controller/validate_jtc_parameters.hpp
 )
-# generate_parameter_library(force_gate_position_velocity_controller_parameters
-#   src/force_gate_position_velocity_controller_parameters.yaml
-# )
 
 add_library(force_gate_controller SHARED
   src/force_gate_controller.cpp
   src/force_gate_parent.cpp
   src/force_gate_position_controller.cpp
   src/force_gate_velocity_controller.cpp
+  src/joint_trajectory_controller_plugin.cpp
   src/tolerances.cpp
   src/trajectory.cpp
   src/validate_jtc_parameters.cpp
@@ -54,7 +52,6 @@ target_include_directories(force_gate_controller PUBLIC
 )
 target_link_libraries(force_gate_controller PUBLIC
   force_gate_controller_parameters
-  # force_gate_position_velocity_controller_parameters
 )
 ament_target_dependencies(force_gate_controller PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
@@ -110,7 +107,6 @@ install(
 install(TARGETS
     force_gate_controller
     force_gate_controller_parameters
-    # force_gate_position_velocity_controller_parameters
   EXPORT export_force_gate_controller
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION lib
