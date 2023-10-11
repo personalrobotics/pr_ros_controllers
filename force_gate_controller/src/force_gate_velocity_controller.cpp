@@ -59,7 +59,7 @@ controller_interface::return_type ForceGateVelocityController::update(
         {
           command_interface.set_value(0.0);
         }
-        return controller_interface::return_type::ERROR;
+        return controller_interface::return_type::OK;
     }
     
     return velocity_controllers::JointGroupVelocityController::update(time, period);

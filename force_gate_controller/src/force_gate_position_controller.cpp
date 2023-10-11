@@ -54,7 +54,7 @@ controller_interface::return_type ForceGatePositionController::update(
 {
     if (!check_wrench_threshold(get_node(), get_node()->now()))
     {
-        return controller_interface::return_type::ERROR;
+        return controller_interface::return_type::OK;
     }
     
     return position_controllers::JointGroupPositionController::update(time, period);
