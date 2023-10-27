@@ -43,6 +43,14 @@ protected:
   // Parameters from ROS for force_gate_controller
   std::shared_ptr<ParamListener> force_gate_param_listener_;
   Params force_gate_params_;
+  rclcpp::TimerBase::SharedPtr param_timer_;
+  std::shared_ptr<rclcpp_lifecycle::LifecycleNode> node_;
+
+  void timer_callback() {
+    if (force_gate_param_listener_ && force_gate_param_listener_->is_old(force_gate_params_)) {
+      read_force_gate_parameters(node_);
+    }
+  }
 
   bool check_wrench_threshold(std::shared_ptr<rclcpp_lifecycle::LifecycleNode> node, const rclcpp::Time & time);
 };
