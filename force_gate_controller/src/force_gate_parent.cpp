@@ -41,6 +41,7 @@ controller_interface::CallbackReturn ForceGateParent::read_force_gate_parameters
   if (!param_timer_)
   {
     node_ = node;
+    // TODO: make 10ms a read-only ROS Param
     param_timer_ = node->create_wall_timer(
       10ms, std::bind(&ForceGateParent::timer_callback, this));
   }
