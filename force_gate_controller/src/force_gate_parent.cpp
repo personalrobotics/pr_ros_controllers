@@ -13,6 +13,9 @@
 // limitations under the License.
 
 // #include <string>
+#include <chrono>
+#include <functional>
+using namespace std::chrono_literals;
 
 #include "controller_interface/controller_interface.hpp"
 // #include "hardware_interface/types/hardware_interface_type_values.hpp"
@@ -34,6 +37,14 @@ controller_interface::CallbackReturn ForceGateParent::read_force_gate_parameters
     }
   }
   force_gate_params_ = force_gate_param_listener_->get_params();
+
+  if (!param_timer_)
+  {
+    node_ = node;
+    // TODO: make 10ms a read-only ROS Param
+    param_timer_ = node->create_wall_timer(
+      10ms, std::bind(&ForceGateParent::timer_callback, this));
+  }
 
   // Update wrench tolerances if thresholding enabled
   rt_wrench_stamped_.writeFromNonRT(nullptr);
