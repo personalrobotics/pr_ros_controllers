@@ -12,16 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// #include <string>
 #include <chrono>
 #include <functional>
 using namespace std::chrono_literals;
 
 #include "controller_interface/controller_interface.hpp"
-// #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "force_gate_controller/force_gate_parent.hpp"
 #include "rclcpp/logging.hpp"
-// #include "rclcpp/parameter.hpp"
 
 namespace force_gate_controller
 {
@@ -50,7 +47,7 @@ controller_interface::CallbackReturn ForceGateParent::read_force_gate_parameters
   rt_wrench_stamped_.writeFromNonRT(nullptr);
   if (force_gate_params_.wrench_threshold.topic != "")
   {
-    RCLCPP_INFO(node->get_logger(), "Updating Wrench Thresholds");
+    RCLCPP_INFO(node->get_logger(), "Updating Wrench Thresholds, fMag %f", force_gate_params_.wrench_threshold.fMag);
 
     wrench_tolerances_.timeout = rclcpp::Duration::from_seconds(force_gate_params_.wrench_threshold.timeout);
     wrench_tolerances_.forceTotal = force_gate_params_.wrench_threshold.fMag;
