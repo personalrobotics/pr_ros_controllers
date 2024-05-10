@@ -729,7 +729,7 @@ controller_interface::CallbackReturn ForceGateController::on_configure(
   // Update wrench tolerances if thresholding enabled
   if (params_.wrench_threshold.topic != "")
   {
-    RCLCPP_INFO(get_node()->get_logger(), "Updating Wrench Thresholds");
+    RCLCPP_INFO(get_node()->get_logger(), "Updating Wrench Thresholds, fMag %f", params_.wrench_threshold.fMag);
     params_ = param_listener_->get_params();
 
     wrench_tolerances_.timeout = rclcpp::Duration::from_seconds(params_.wrench_threshold.timeout);
