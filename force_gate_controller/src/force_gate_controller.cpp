@@ -1245,7 +1245,7 @@ rclcpp_action::GoalResponse ForceGateController::goal_received_callback(
   // Update wrench tolerances if thresholding enabled
   if (params_.wrench_threshold.topic != "")
   {
-    RCLCPP_INFO(get_node()->get_logger(), "Updating Wrench Thresholds");
+    RCLCPP_INFO(get_node()->get_logger(), "Updating Wrench Thresholds, fMag %f", params_.wrench_threshold.fMag);
     if (param_listener_->is_old(params_)) {
       params_ = param_listener_->get_params();
 

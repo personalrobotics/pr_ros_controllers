@@ -44,11 +44,10 @@ controller_interface::CallbackReturn ForceGateParent::read_force_gate_parameters
   }
 
   // Update wrench tolerances if thresholding enabled
+  RCLCPP_INFO(node->get_logger(), "Updating Wrench Thresholds, fMag %f", force_gate_params_.wrench_threshold.fMag);
   rt_wrench_stamped_.writeFromNonRT(nullptr);
   if (force_gate_params_.wrench_threshold.topic != "")
   {
-    RCLCPP_INFO(node->get_logger(), "Updating Wrench Thresholds, fMag %f", force_gate_params_.wrench_threshold.fMag);
-
     wrench_tolerances_.timeout = rclcpp::Duration::from_seconds(force_gate_params_.wrench_threshold.timeout);
     wrench_tolerances_.forceTotal = force_gate_params_.wrench_threshold.fMag;
     wrench_tolerances_.forceVec[0] = force_gate_params_.wrench_threshold.fx;
